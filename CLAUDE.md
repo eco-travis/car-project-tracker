@@ -39,7 +39,8 @@ npm run typecheck   # next typegen && tsc --noEmit
 npm run lint
 npm run format      # prettier --write (format:check in CI)
 npm run test        # unit + database (Vitest)
-npm run test:e2e    # Playwright, desktop 1280x800 + phone 390x844
+npm run test:e2e    # Playwright, desktop 1280x800 + phone 390x844 (dev server)
+npm run test:e2e:preview  # same suite against a production build
 npm run db:start    # supabase start (needs Docker running)
 npm run db:reset    # supabase db reset (migrations + seed)
 npm run db:types    # regenerate lib/db/types.ts
@@ -49,4 +50,5 @@ npm run db:types    # regenerate lib/db/types.ts
 
 - Node 22 (`.nvmrc`). Dependencies are pinned exactly (`.npmrc` has `save-exact=true`).
 - Local env vars go in `.env.local` (see `.env.example`); values come from `npm run db:start` output.
+- Database and e2e tests need local Supabase running (`npm run db:start`). E2E creates throwaway users through the local admin API; sign-in-gate tests use `ALLOWED_EMAIL` from `.env.local` and Mailpit.
 - Phone e2e uses Chromium with mobile emulation; Playwright's WebKit build doesn't run on this Mac (macOS 14).

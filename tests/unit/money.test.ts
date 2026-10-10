@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCents } from "@/lib/domain/money";
+import { formatCents, parseDollarsToCents } from "@/lib/domain/money";
 
 describe("formatCents", () => {
   it("formats positive, zero, and negative cents as USD", () => {
@@ -11,4 +11,29 @@ describe("formatCents", () => {
   it("rejects non-integer input", () => {
     expect(() => formatCents(1.5)).toThrow(RangeError);
   });
+});
+
+describe("parseDollarsToCents", () => {
+  it.each([
+    ["1234.56", 123456],
+    ["$1,234.5", 123450],
+    ["80", 8000],
+    [" 0.07 ", 7],
+    [".5", 50],
+    ["-20", -2000],
+    ["-0", 0],
+  ])("parses %j as %i cents", (input, cents) => {
+    expect(parseDollarsToCents(input)).toBe(cents);
+  });
+
+  it("returns null for blank input", () => {
+    expect(parseDollarsToCents("   ")).toBeNull();
+  });
+
+  it.each(["abc", "1.234", "1..2", "12-3", "1e5"])(
+    "returns NaN for %j",
+    (input) => {
+      expect(parseDollarsToCents(input)).toBeNaN();
+    },
+  );
 });

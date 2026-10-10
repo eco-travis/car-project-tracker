@@ -46,3 +46,28 @@ Travis chose to build and preview locally and deploy later. Changes to the plan'
 - Risks that only show up on Vercel (function time limits for PDF exports, magic-link redirect URLs, env vars, CSP against the hosted Supabase origin) are checked at that point. Recommend deploying no later than the end of M4, since phone capture is the main reason to have it hosted.
 
 **M0 status:** dev server, local Supabase, and CI (run 38025544573) pass. Vercel deploy deferred per above.
+
+## M1 — Schema, auth, shell (2026-10-09)
+
+**Shipped:** every table, enum, index, and owner-only RLS policy from the plan; private `attachments` bucket with path-prefix storage policies; generated types; magic-link sign-in gated to `ALLOWED_EMAIL`; session refresh, auth redirects, and security headers in `proxy.ts`; onboarding (vehicle + five seeded phases in one transaction); authenticated shell with every screen as a placeholder.
+
+**Acceptance:** all four criteria pass. `tests/e2e/auth.spec.ts` (other emails get an error and no mail reaches Mailpit), `tests/e2e/onboarding.spec.ts` + `tests/db/onboarding.test.ts` (rule 21, `/` then goes to the dashboard), `tests/db/rls.test.ts` (second user can't read, update, delete, or forge rows in any of the 15 tables, or read, list, sign, overwrite, or delete storage objects; I confirmed it fails when RLS is turned off on one table), `tests/e2e/navigation.spec.ts` (sidebar at 1280px, bottom nav + More sheet at 390px). The e2e suite also passes against a production build (`npm run test:e2e:preview`).
+
+**Decisions**
+
+- **Cache Components off.** Every screen reads per-user data, and CSP nonces require dynamic rendering, so the root layout calls `connection()`. Revisit only if the dashboard misses its 1-second target.
+- **Views deferred to the milestones that test them**: cost views in M3, `v_job_blockers` in M2, `v_watch_due` in M5. M1 created every table so generated types are complete.
+- **One vehicle per owner** enforced by a unique index (MVP scope; it also makes onboarding idempotent against double submits). Multi-vehicle (post-MVP) drops it in a new migration.
+- **Join tables carry `owner_id`** as well, so the one owner policy covers every table.
+- **Magic links use `token_hash`**, not PKCE: the email template links to `/auth/callback?token_hash=…&type=email`, so a link requested on the desktop can be opened on the phone. The callback still accepts a PKCE `code`.
+- **CSP:** per-request script nonces with `strict-dynamic`; `style-src 'unsafe-inline'` because Radix sets inline style attributes; Supabase origin allowed for img, media, and connect. Also sends `Referrer-Policy: same-origin` and `X-Content-Type-Options: nosniff`. `upgrade-insecure-requests` is omitted so the LAN preview works over http; Vercel serves https anyway.
+- **Phone bottom nav:** Dashboard, Plan, Work Log, Gallery, plus "More" (a bottom sheet with the other six screens and Sign out). The global quick-add button joins it in M4.
+- **Next dev indicator moved to top-right**: the default bottom-left covered the phone nav.
+- **CI starts local Supabase** (minus unused services) so database tests run on every push.
+- **Cross-owner foreign keys aren't blocked** at the database level: Postgres FK checks bypass RLS, so a second user could create their _own_ row pointing at the first user's id. They still can't read or change the first user's data. Acceptable for a single-user app with sign-ups disabled; server actions only use ids the user can read.
+
+**For the deployment milestone (additions to human setup step 4):**
+
+1. Create the one user in Supabase Auth (Dashboard → Authentication → Add user, with `ALLOWED_EMAIL`) _before_ disabling sign-ups. With sign-ups off, a magic link can't create the account.
+2. Set the Magic Link and Confirm signup email templates to link to `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email` (copy `supabase/templates/magic_link.html`).
+3. Add `https://<prod-domain>/**` and the Vercel preview pattern to redirect URLs.
