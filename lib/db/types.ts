@@ -54,6 +54,12 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "attachments_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "attachments_part_id_fkey"
       columns: ["part_id"]
 isOneToOne: false
@@ -116,6 +122,12 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "expenses_part_id_fkey"
       columns: ["part_id"]
 isOneToOne: false
@@ -160,6 +172,12 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "inspirations_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "inspirations_promoted_part_id_fkey"
       columns: ["promoted_part_id"]
 isOneToOne: false
@@ -192,11 +210,23 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "job_dependencies_blocked_by_job_id_fkey"
+      columns: ["blocked_by_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "job_dependencies_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_dependencies_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
     }
                   ]
                 },"job_tools": {
@@ -217,6 +247,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_tools_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
     },{
       foreignKeyName: "job_tools_tool_id_fkey"
       columns: ["tool_id"]
@@ -270,6 +306,12 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "parts_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "parts_replaces_part_id_fkey"
       columns: ["replaces_part_id"]
 isOneToOne: false
@@ -321,6 +363,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_links_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
     },{
       foreignKeyName: "task_links_part_id_fkey"
       columns: ["part_id"]
@@ -466,6 +514,12 @@ isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "watch_items_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
       foreignKeyName: "watch_items_vehicle_id_fkey"
       columns: ["vehicle_id"]
 isOneToOne: false
@@ -476,11 +530,30 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "v_job_blockers": {
+                  Row: {
+                    "job_id": string | null,"open_blockers": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_job_open_blockers": {
+                  Row: {
+                    "blocker_id": string | null,"job_id": string | null,"kind": string | null,"title": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                }
           }
           Functions: {
             "create_vehicle_with_phases":
 { Args: { "p_current_odometer"?: number,"p_generation"?: string,"p_model"?: string,"p_name": string,"p_phase_names": (string)[],"p_purchase_date"?: string,"p_purchase_price_cents"?: number,"p_vin"?: string,"p_year"?: number }; Returns: string
+                           },
+"reorder_phases":
+{ Args: { "p_phase_ids": (string)[] }; Returns: undefined
                            }
           }
           Enums: {

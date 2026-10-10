@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  MAX_ODOMETER,
   optionalDate,
   optionalInt,
   optionalMoney,
@@ -12,9 +13,26 @@ export const vehicleSchema = z.object({
   model: optionalText,
   generation: optionalText,
   vin: optionalText.transform((v) => v?.toUpperCase() ?? null),
-  current_odometer: optionalInt("Odometer").transform((n) => n ?? 0),
+  current_odometer: optionalInt("Odometer", 0, MAX_ODOMETER).transform(
+    (n) => n ?? 0,
+  ),
   purchase_date: optionalDate,
   purchase_price_cents: optionalMoney("Purchase price"),
+});
+
+/** Vehicle page edits. The odometer has its own form (it can only go up). */
+export const vehicleUpdateSchema = vehicleSchema
+  .omit({ current_odometer: true })
+  .extend({ notes: optionalText });
+
+export type VehicleUpdateFormValues = z.input<typeof vehicleUpdateSchema>;
+export type VehicleUpdateInput = z.output<typeof vehicleUpdateSchema>;
+
+export const odometerSchema = z.object({
+  current_odometer: optionalInt("Odometer", 0, MAX_ODOMETER).refine(
+    (n) => n !== null,
+    "Enter the odometer reading.",
+  ),
 });
 
 /** Form values: every input is a string. */

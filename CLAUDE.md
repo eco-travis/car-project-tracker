@@ -42,7 +42,8 @@ npm run test        # unit + database (Vitest)
 npm run test:e2e    # Playwright, desktop 1280x800 + phone 390x844 (dev server)
 npm run test:e2e:preview  # same suite against a production build
 npm run db:start    # supabase start (needs Docker running)
-npm run db:reset    # supabase db reset (migrations + seed)
+npm run db:reset    # supabase db reset, then db:seed
+npm run db:seed     # demo data owned by ALLOWED_EMAIL (local only)
 npm run db:types    # regenerate lib/db/types.ts
 ```
 

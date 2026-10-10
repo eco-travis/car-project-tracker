@@ -1,7 +1,6 @@
 import type { ComponentProps } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Field, fieldAria } from "./field";
 
 type TextFieldProps = ComponentProps<typeof Input> & {
   label: string;
@@ -21,33 +20,20 @@ export function TextField({
   ...inputProps
 }: TextFieldProps) {
   const inputId = id ?? name;
-  const describedBy = [error && `${inputId}-error`, hint && `${inputId}-hint`]
-    .filter(Boolean)
-    .join(" ");
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <Label htmlFor={inputId}>{label}</Label>
+    <Field
+      id={inputId}
+      label={label}
+      error={error}
+      hint={hint}
+      className={className}
+    >
       <Input
         id={inputId}
         name={name}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
+        {...fieldAria(inputId, error, hint)}
         {...inputProps}
       />
-      {hint && !error && (
-        <p id={`${inputId}-hint`} className="text-muted-foreground text-xs">
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p
-          id={`${inputId}-error`}
-          role="alert"
-          className="text-destructive text-sm"
-        >
-          {error}
-        </p>
-      )}
-    </div>
+    </Field>
   );
 }

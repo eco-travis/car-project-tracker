@@ -71,3 +71,28 @@ Travis chose to build and preview locally and deploy later. Changes to the plan'
 1. Create the one user in Supabase Auth (Dashboard → Authentication → Add user, with `ALLOWED_EMAIL`) _before_ disabling sign-ups. With sign-ups off, a magic link can't create the account.
 2. Set the Magic Link and Confirm signup email templates to link to `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email` (copy `supabase/templates/magic_link.html`).
 3. Add `https://<prod-domain>/**` and the Vercel preview pattern to redirect URLs.
+
+## M2 — Plan and Work Log (2026-10-10)
+
+**Shipped:** phase CRUD with drag-to-reorder (pointer and keyboard); job CRUD within phases and unphased; blocked-by dependencies with cycle rejection; job detail page with a status control, Mark done dialog, completion editing, and dependency management; Work Log with type and phase filters and text search; vehicle page with notes and a manual odometer update; local seed data.
+
+**Acceptance:** all three criteria pass.
+
+- Rules 1–5, 14, 21, 22 are pure functions in `lib/domain/` (`jobs.ts`, `odometer.ts`, `phases.ts`) with unit tests, enforced in `lib/actions/`.
+- The Plan shows blocked jobs with their blockers' names, linked to each blocking job ("Blocked by All-terrain tires"); the phase header shows "Missing: N jobs are blocked".
+- Spec flow 2 (`tests/e2e/mark-job-done.spec.ts`) and flow 5 (`tests/e2e/plan-a-phase.spec.ts`) pass at both viewports, on dev and on a production build.
+
+**Decisions**
+
+- **Rule 14 runs as a database trigger** (`jobs_raise_vehicle_odometer`), not an RPC. Every path that saves a done job (Mark done, completion edits, future imports) raises the odometer in the same transaction, and it can only go up. `lib/domain/odometer.ts` stays the reference rule and the trigger is tested against it. M5's watch check-ins get the same treatment.
+- **Rule 2 runs in the server action** from source rows through `openBlockers()` / `statusChangeError()`. The client runs the same check first for instant feedback, and the server re-checks.
+- **Views:** `v_job_open_blockers` (one row per open blocker, used for the names on the Plan) and `v_job_blockers` (the count the plan asked for). A DB test checks the view against the domain function on the same data.
+- **Rule 4:** after Mark done, a follow-up step offers to mark Received parts Installed ("Not now" leaves them). The "add after photos" half of the offer arrives with media in M4.
+- **Reopening a done job** keeps its completion date and odometer, so nothing is lost if it's marked done again.
+- **"Today" means Pacific time** (`lib/domain/dates.ts`), matching the spec's photo-date decision.
+- **Native `<select>` everywhere** in forms: it opens the phone's own picker.
+- **Odometer inputs are capped at 9,999,999 miles**, so absurd values get a validation message, not a database error.
+- **Seed data is a script, not `seed.sql`.** `npm run db:reset` resets and then runs `scripts/seed.mts`, which creates demo data owned by `ALLOWED_EMAIL`. A SQL seed would need a hard-coded user id and email in the repo, and the repo is public. E2E tests don't use seed data; every test creates its own throwaway user.
+- **The dnd-kit `DndContext` has a fixed `id`.** Its generated ids come from a module-level counter that drifts between server and client, which caused intermittent hydration mismatches. The e2e fixture now fails any test that logs a hydration error, and I confirmed it catches this one.
+- **E2E waits for hydration** after every full page load (`html[data-hydrated]`), because typing into a not-yet-hydrated input lost keystrokes.
+- **Next's dev indicator is off**: every corner collided with app chrome. The error overlay still appears.

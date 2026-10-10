@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { deleteMessagesTo, firstLink, messagesTo } from "./support/mailpit";
 
 const allowedEmail = process.env.ALLOWED_EMAIL!;
