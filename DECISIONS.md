@@ -36,3 +36,13 @@ Log of plan/spec conflicts, internal choices, and milestone notes. The spec (`do
 - `lib/domain/money.ts` (`formatCents`) added early as the unit-test smoke check; `components/money.tsx` will wrap it.
 
 **Pending (human):** GitHub repo + `gh auth login` (step 1), Supabase + Vercel projects (step 2), Vercel env vars (step 3). Until then CI and the Vercel deploy criteria are unchecked.
+
+## Deployment deferred (2026-10-09)
+
+Travis chose to build and preview locally and deploy later. Changes to the plan's definition of done:
+
+- "Deployed to Vercel production and smoke-checked" is replaced by: `npm run preview` (production build + `next start`) against local Supabase, smoke-checked by signing in and opening each screen touched by the milestone.
+- M0's "deploys to Vercel" criterion and human setup steps 2–5 move to a later deployment milestone, before real use from the phone.
+- Risks that only show up on Vercel (function time limits for PDF exports, magic-link redirect URLs, env vars, CSP against the hosted Supabase origin) are checked at that point. Recommend deploying no later than the end of M4, since phone capture is the main reason to have it hosted.
+
+**M0 status:** dev server, local Supabase, and CI (run 38025544573) pass. Vercel deploy deferred per above.

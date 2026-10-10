@@ -21,6 +21,7 @@ Build milestones M0 through M9 in order. A milestone is done only when every acc
 - Never commit secrets. Read configuration only from environment variables listed in the plan's Human setup.
 - Commit at least once per milestone with a message starting `M<n>:`.
 - Production migrations (`supabase db push`) run only after the human approves in chat.
+- Deployment is deferred (see `DECISIONS.md`): the definition-of-done smoke check runs against `npm run preview` with local Supabase instead of Vercel.
 
 **Stop and ask the human when:**
 
@@ -33,6 +34,7 @@ Build milestones M0 through M9 in order. A milestone is done only when every acc
 
 ```
 npm run dev         # Next.js dev server
+npm run preview     # production build + next start (stand-in for deploy smoke check)
 npm run typecheck   # next typegen && tsc --noEmit
 npm run lint
 npm run format      # prettier --write (format:check in CI)
