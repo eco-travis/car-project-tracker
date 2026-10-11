@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Receipt as ReceiptIcon, Trash2 } from "lucide-react";
 import { ConfirmButton } from "@/components/confirm-button";
+import { AttachmentsDialog } from "@/components/media/attachments-dialog";
 import { Money } from "@/components/money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,22 @@ export function ExpenseList({
                   ) : (
                     <Badge variant="outline">Paid</Badge>
                   )}
+                  <AttachmentsDialog
+                    parent={{ kind: "expense", id: e.id }}
+                    title="Receipts"
+                    description={`${label}, ${formatDate(e.spent_on)}`}
+                    receipt
+                    uploadLabel="Add receipt"
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={`Receipts for ${label}`}
+                      >
+                        <ReceiptIcon aria-hidden />
+                      </Button>
+                    }
+                  />
                   {e.category !== "sale" && (
                     <ExpenseFormDialog
                       expense={e}

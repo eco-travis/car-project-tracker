@@ -83,16 +83,20 @@ export const test = base.extend<{ user: E2EUser }>({
       await waitForHydration();
       return response;
     };
-    // Server/client render mismatches are bugs even when the page looks fine; fail the test.
-    const hydrationErrors: string[] = [];
+    // Hydration mismatches and duplicate keys are bugs even when the page looks fine; fail the test.
+    const reactErrors: string[] = [];
     page.on("console", (m) => {
-      if (m.type() === "error" && /hydrat/i.test(m.text()))
-        hydrationErrors.push(m.text().slice(0, 300));
+      if (
+        m.type() === "error" &&
+        /hydrat|two children with the same key/i.test(m.text())
+      )
+        reactErrors.push(m.text().slice(0, 300));
     });
     await provide(page);
-    expect(hydrationErrors, "hydration errors in the browser console").toEqual(
-      [],
-    );
+    expect(
+      reactErrors,
+      "React hydration or key errors in the browser console",
+    ).toEqual([]);
   },
   // A fresh, isolated user per test; deleted afterwards (rows cascade).
   user: async ({}, provide) => {
@@ -140,4 +144,39 @@ export async function seedRow(
     .single();
   if (error) throw error;
   return (data as { id?: string }).id ?? "";
+}
+
+/**
+ * Uploads a real JPEG (and thumbnail) to local Storage and inserts its attachment row, as the
+ * upload pipeline would. Returns the attachment id.
+ */
+export async function seedPhoto(
+  user: E2EUser,
+  vehicle: SeededVehicle,
+  values: Record<string, unknown> & { taken_at: string },
+): Promise<string> {
+  const { baseJpeg } = await import("../support/jpeg");
+  const admin = adminClient();
+  const id = randomUUID();
+  const path = `${user.id}/${id}/photo.jpg`;
+  const thumb = `${user.id}/${id}/thumb.jpg`;
+  for (const p of [path, thumb]) {
+    const { error } = await admin.storage
+      .from("attachments")
+      .upload(p, baseJpeg(), { contentType: "image/jpeg" });
+    if (error) throw error;
+  }
+  const { error } = await admin.from("attachments").insert({
+    id,
+    owner_id: user.id,
+    vehicle_id: vehicle.id,
+    storage_path: path,
+    thumb_path: thumb,
+    mime_type: "image/jpeg",
+    size_bytes: baseJpeg().length,
+    kind: "photo",
+    ...values,
+  } as never);
+  if (error) throw error;
+  return id;
 }

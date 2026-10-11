@@ -80,6 +80,10 @@ test.describe("spec flow 5: plan a phase (jobs and blockers)", () => {
       .getByRole("dialog", { name: "Mark job done" })
       .getByRole("button", { name: "Mark done" })
       .click();
+    await page
+      .getByRole("dialog", { name: "Job marked done" })
+      .getByRole("button", { name: "Done" })
+      .click();
     await expect(page.getByLabel("Status", { exact: true })).toHaveValue(
       "done",
     );

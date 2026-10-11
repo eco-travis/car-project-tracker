@@ -130,3 +130,29 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **Record sale stays mounted after the sale.** The part becomes Sold on refresh; unmounting the dialog had swallowed the "mark linked tasks done?" follow-up.
 - **`formatCents` normalizes −0**, which had rendered as "-$0.00".
 - **The demo seed now includes** 8 parts across the lifecycle, 3 tools (one Need to buy), and 8 expenses (two committed), so every money screen has data locally.
+
+## M4 — Media, quick-add, Gallery (2026-10-11)
+
+**Shipped:** the upload pipeline (EXIF taken date, client-side compression to 2560px plus a 480px thumbnail, signed direct-to-Storage uploads, resumable TUS uploads for clips over 6 MB, finalize-then-insert with cleanup on failure); attachment sections on job, part, and vehicle pages and attachment dialogs on phases, tools, and expense rows (receipts); Before/During/After tags, highlight star, caption, and editable taken date; delete removes the stored files; global quick-add (desktop sidebar button, phone camera button); the Gallery (month groups, filters, highlights only, receipts/documents toggle, oldest/newest order, keyset "Load more" at 60 per page); the carousel (swipe, pinch zoom, video and audio, captions with date, odometer, phase, job, and a link to the record, plus a star toggle); scoped "View photos" on job, phase (includes its jobs' media), and part; the "Add after photos" half of rule 4 after Mark done.
+
+**Acceptance:** all three criteria pass.
+
+- Phone e2e: quick-add uploads in two taps after choosing the file, and the photo lands on the job and in the Gallery under its taken month (`tests/e2e/media.spec.ts`).
+- Inspiration media never appears in the Gallery, and receipts appear only with the toggle on.
+- Flows 1, 10, and 11 pass at both viewports, on dev and on a production build (strict CSP).
+- `v_attachment_details` has a DB test.
+
+**Decisions**
+
+- **Taken date:** EXIF `DateTimeOriginal`, else `CreateDate`, read as raw strings (exifr `reviveValues: false`) and interpreted as Pacific wall time unless the file records an offset; then the file's `lastModified`, then now. DST is handled (`wallTimeToUtc`, unit-tested). The edit form takes Pacific local time.
+- **Gallery order:** oldest first by default, matching flow 10 ("swipe oldest to newest"), with a Newest first option. The carousel follows the grid's order.
+- **Resumable uploads** (`tus-js-client`) authenticate with the signed-in user's access token, because Supabase's TUS endpoint takes a bearer token, not the signed-upload token. Storage RLS still limits writes to the user's own path prefix. Photos and thumbnails use signed upload URLs as planned.
+- **Paths are recomputed server-side** at finalize from the server-generated id and the filename, and the object must exist before the row is written. The client never supplies a path.
+- **Compression runs on the main thread** (`useWebWorker: false`): the library's worker loads a script from a CDN, which the CSP blocks. Fine for one photo at a time; revisit if batch uploads feel slow.
+- **No `capture` attribute** on file inputs: on iOS it forces the camera and hides the photo library. Without it the picker offers camera, library, and files.
+- **HEIC** that arrives undecoded is stored as-is with a generic tile (no thumbnail); the carousel can't show it.
+- **Upload cap** comes from `NEXT_PUBLIC_MAX_UPLOAD_MB` (default 500, local bucket 1 GiB). Set it to the production bucket limit at deploy (human setup step 6).
+- **After Mark done** the follow-up step always appears, with optional "Mark installed" (if any parts are Received) and "Add after photos" (tagged After), closed with Done.
+- **The carousel's slides are memoized.** The lightbox resets to its starting index whenever `slides` changes identity, which had made Next and swipe snap back to the first slide.
+- **The e2e console guard** now also fails tests on React duplicate-key errors (it caught one on the Gallery page).
+- **Not in M4:** media on watch items, check-ins, tasks, and inspiration comes with M5 and M6. The attachments panel and parent plumbing already support them.

@@ -9,9 +9,11 @@ import { NAV_ITEMS, isActive } from "./nav-items";
 export function Sidebar({
   vehicleName,
   footer,
+  quickAdd,
 }: {
   vehicleName: string;
   footer: ReactNode;
+  quickAdd?: ReactNode;
 }) {
   const pathname = usePathname();
   return (
@@ -21,6 +23,7 @@ export function Sidebar({
           Project
         </p>
         <p className="truncate font-semibold">{vehicleName}</p>
+        {quickAdd && <div className="mt-3">{quickAdd}</div>}
       </div>
       <nav aria-label="Main" className="flex-1 overflow-y-auto px-2">
         <ul className="flex flex-col gap-0.5">

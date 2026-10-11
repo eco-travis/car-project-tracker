@@ -45,7 +45,14 @@ test.describe("spec flow 2: mark job done", () => {
       "1 part on this job is marked Received",
     );
     await expect(followUp).toContainText("ATF 3309");
+    await expect(
+      followUp.getByRole("button", { name: "Add after photos" }),
+    ).toBeVisible();
     await followUp.getByRole("button", { name: "Mark installed" }).click();
+    await expect(followUp.getByRole("status")).toHaveText(
+      "Parts marked Installed.",
+    );
+    await followUp.getByRole("button", { name: "Done" }).click();
     await expect(followUp).toBeHidden();
 
     const status = page.getByRole("region", { name: "Status and completion" });
@@ -113,6 +120,10 @@ test.describe("spec flow 2: mark job done", () => {
     await dialog.getByLabel("Completed on").fill("2025-06-01");
     await dialog.getByLabel("Odometer (miles)").fill("120000");
     await dialog.getByRole("button", { name: "Mark done" }).click();
+    await page
+      .getByRole("dialog", { name: "Job marked done" })
+      .getByRole("button", { name: "Done" })
+      .click();
     await expect(dialog).toBeHidden();
     const { data } = await adminClient()
       .from("vehicles")

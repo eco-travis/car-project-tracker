@@ -11,11 +11,14 @@ import { CostSummary } from "@/components/cost-summary";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { JobPartsPanel } from "@/components/jobs/job-parts-panel";
+import { AttachmentsPanel } from "@/components/media/attachments-panel";
+import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { JobToolsPanel } from "@/components/jobs/job-tools-panel";
 import { JobFormDialog } from "@/components/plan/job-form-dialog";
 import { Button } from "@/components/ui/button";
 import { requireVehicle } from "@/lib/auth";
 import { getJob } from "@/lib/db/queries/jobs";
+import { getAttachmentsFor } from "@/lib/db/queries/media";
 import { getLinkOptions } from "@/lib/db/queries/options";
 import { getPhaseOptions } from "@/lib/db/queries/plan";
 import { formatHours } from "@/lib/domain/costs";
@@ -36,11 +39,12 @@ export async function generateMetadata({
 export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const [data, phases, vehicle, links] = await Promise.all([
+  const [data, phases, vehicle, links, media] = await Promise.all([
     getJob(id),
     getPhaseOptions(),
     requireVehicle(),
     getLinkOptions(),
+    getAttachmentsFor({ kind: "job", id }),
   ]);
   if (!data) notFound();
   const { job } = data;
@@ -108,6 +112,18 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
         )}
       </section>
 
+      <section
+        aria-labelledby="job-photos-heading"
+        className="rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="job-photos-heading" className="font-semibold">
+            Photos and files
+          </h2>
+          <ViewPhotosButton scope={{ kind: "job", id: job.id }} />
+        </div>
+        <AttachmentsPanel parent={{ kind: "job", id: job.id }} items={media} />
+      </section>
       <section
         aria-labelledby="costs-heading"
         className="rounded-xl border p-4"

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
-import { Pencil, Plus, Receipt } from "lucide-react";
+import { Image as ImageIcon, Pencil, Plus, Receipt } from "lucide-react";
 import { z } from "zod";
 import { ConfirmButton } from "@/components/confirm-button";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { controlClass } from "@/components/form/field";
+import { AttachmentsDialog } from "@/components/media/attachments-dialog";
 import { Money } from "@/components/money";
 import { PageHeader } from "@/components/shell/page-header";
 import { ToolFormDialog } from "@/components/tools/tool-form-dialog";
@@ -175,6 +176,19 @@ export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
                             aria-label={`Add expense for ${t.name}`}
                           >
                             <Receipt aria-hidden />
+                          </Button>
+                        }
+                      />
+                      <AttachmentsDialog
+                        parent={{ kind: "tool", id: t.id }}
+                        title={`Photos of ${t.name}`}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`Photos of ${t.name}`}
+                          >
+                            <ImageIcon aria-hidden />
                           </Button>
                         }
                       />

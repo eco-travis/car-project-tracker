@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applyActionErrors } from "@/components/form/apply-errors";
+import { UploadButton } from "@/components/media/upload-button";
 import { FormError } from "@/components/form/form-error";
 import { SelectField } from "@/components/form/select-field";
 import { TextField } from "@/components/form/text-field";
@@ -60,6 +61,7 @@ export function CompletionDialog({
     { id: string; name: string }[] | null
   >(null);
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null);
+  const [partsInstalled, setPartsInstalled] = useState(false);
 
   const values: CompletionFormValues = {
     completed_on: job.completed_on ?? defaults.completed_on,
@@ -88,8 +90,8 @@ export function CompletionDialog({
   const onSubmit = handleSubmit(async () => {
     const result = await completeJob(job.id, getValues());
     if (!result.ok) return applyActionErrors(result, setError);
-    if (!editing && result.data.receivedParts.length > 0)
-      setFollowUp(result.data.receivedParts);
+    // Rule 4: offer (never force) installing Received parts and adding after photos.
+    if (!editing) setFollowUp(result.data.receivedParts);
     else setOpen(false);
   });
 
@@ -99,6 +101,7 @@ export function CompletionDialog({
       reset(values);
       setFollowUp(null);
       setFollowUpMessage(null);
+      setPartsInstalled(false);
     }
   }
 
@@ -111,30 +114,62 @@ export function CompletionDialog({
             <DialogHeader>
               <DialogTitle>Job marked done</DialogTitle>
               <DialogDescription>
-                {followUp.length === 1
-                  ? `1 part on this job is marked Received. Mark it Installed?`
-                  : `${followUp.length} parts on this job are marked Received. Mark them Installed?`}
+                Optional follow-ups. You can also do these later from the job
+                page.
               </DialogDescription>
             </DialogHeader>
-            <ul className="list-disc pl-5 text-sm">
-              {followUp.map((p) => (
-                <li key={p.id}>{p.name}</li>
-              ))}
-            </ul>
-            <FormError message={followUpMessage ?? undefined} />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Not now
-              </Button>
-              <Button
-                onClick={async () => {
-                  const result = await installReceivedParts(job.id);
-                  if (result.ok) setOpen(false);
-                  else setFollowUpMessage(result.error);
-                }}
+            {followUp.length > 0 && (
+              <section
+                aria-label="Received parts"
+                className="flex flex-col gap-2 rounded-lg border p-3"
               >
-                Mark installed
-              </Button>
+                {partsInstalled ? (
+                  <p role="status" className="text-sm">
+                    Parts marked Installed.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm">
+                      {followUp.length === 1
+                        ? "1 part on this job is marked Received. Mark it Installed?"
+                        : `${followUp.length} parts on this job are marked Received. Mark them Installed?`}
+                    </p>
+                    <ul className="list-disc pl-5 text-sm">
+                      {followUp.map((p) => (
+                        <li key={p.id}>{p.name}</li>
+                      ))}
+                    </ul>
+                    <FormError message={followUpMessage ?? undefined} />
+                    <Button
+                      variant="outline"
+                      className="self-start"
+                      onClick={async () => {
+                        const result = await installReceivedParts(job.id);
+                        if (result.ok) setPartsInstalled(true);
+                        else setFollowUpMessage(result.error);
+                      }}
+                    >
+                      Mark installed
+                    </Button>
+                  </>
+                )}
+              </section>
+            )}
+            <section
+              aria-label="After photos"
+              className="flex flex-col gap-2 rounded-lg border p-3"
+            >
+              <p className="text-sm">
+                Add after photos? They&apos;re tagged After.
+              </p>
+              <UploadButton
+                parent={{ kind: "job", id: job.id }}
+                tag="after"
+                label="Add after photos"
+              />
+            </section>
+            <DialogFooter>
+              <Button onClick={() => setOpen(false)}>Done</Button>
             </DialogFooter>
           </>
         ) : (

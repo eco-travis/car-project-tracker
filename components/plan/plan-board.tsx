@@ -21,6 +21,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { CostSummary } from "@/components/cost-summary";
+import { AttachmentsDialog } from "@/components/media/attachments-dialog";
+import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -268,6 +270,24 @@ function SortablePhase({
                   aria-label={`Add job to ${phase.name}`}
                 >
                   <Plus aria-hidden /> Add job
+                </Button>
+              }
+            />
+            <ViewPhotosButton
+              scope={{ kind: "phase", id: phase.id }}
+              label="Photos"
+            />
+            <AttachmentsDialog
+              parent={{ kind: "phase", id: phase.id }}
+              title={`Files for ${phase.name}`}
+              description="Phase-level photos and documents. Job photos live on each job."
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Add files to ${phase.name}`}
+                >
+                  Files
                 </Button>
               }
             />

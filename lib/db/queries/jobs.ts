@@ -171,3 +171,22 @@ function searchTerm(q: string | undefined): string | null {
   const like = `%${trimmed.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   return `"${like.replace(/[\\"]/g, (c) => `\\${c}`)}"`;
 }
+
+/** Quick-add job picker: most recently touched first (cancelled jobs excluded). */
+export async function getRecentJobs(limit = 15) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("id, title, status, phase:phases(name)")
+    .neq("status", "cancelled")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data.map((j) => ({
+    id: j.id,
+    title: j.title,
+    phaseName: j.phase?.name ?? null,
+  }));
+}
+
+export type RecentJob = Awaited<ReturnType<typeof getRecentJobs>>[number];

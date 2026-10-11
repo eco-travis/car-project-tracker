@@ -5,12 +5,15 @@ import { z } from "zod";
 import { ConfirmButton } from "@/components/confirm-button";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { ExpenseList } from "@/components/expenses/expense-list";
+import { AttachmentsPanel } from "@/components/media/attachments-panel";
+import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { Money } from "@/components/money";
 import { PartFormDialog } from "@/components/parts/part-form-dialog";
 import { PartStatusControl } from "@/components/parts/part-status-control";
 import { RecordSaleDialog } from "@/components/parts/record-sale-dialog";
 import { Button } from "@/components/ui/button";
 import { deletePart } from "@/lib/actions/parts";
+import { getAttachmentsFor } from "@/lib/db/queries/media";
 import { getLinkOptions } from "@/lib/db/queries/options";
 import { getPart } from "@/lib/db/queries/parts";
 import { todayIso } from "@/lib/domain/dates";
@@ -28,7 +31,11 @@ export async function generateMetadata({
 export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const [data, links] = await Promise.all([getPart(id), getLinkOptions()]);
+  const [data, links, media] = await Promise.all([
+    getPart(id),
+    getLinkOptions(),
+    getAttachmentsFor({ kind: "part", id }),
+  ]);
   if (!data) notFound();
   const { part } = data;
   const today = todayIso();
@@ -176,6 +183,21 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
         </dl>
       </section>
 
+      <section
+        aria-labelledby="part-photos-heading"
+        className="rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="part-photos-heading" className="font-semibold">
+            Photos and files
+          </h2>
+          <ViewPhotosButton scope={{ kind: "part", id: part.id }} />
+        </div>
+        <AttachmentsPanel
+          parent={{ kind: "part", id: part.id }}
+          items={media}
+        />
+      </section>
       <section aria-labelledby="part-money" className="rounded-xl border p-4">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="part-money" className="font-semibold">
