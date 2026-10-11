@@ -4,12 +4,17 @@ import { PageHeader } from "@/components/shell/page-header";
 import { PhaseFormDialog } from "@/components/plan/phase-form-dialog";
 import { PlanBoard } from "@/components/plan/plan-board";
 import { Button } from "@/components/ui/button";
+import { getLinkOptions } from "@/lib/db/queries/options";
 import { getPlan } from "@/lib/db/queries/plan";
+import { todayIso } from "@/lib/domain/dates";
 
 export const metadata: Metadata = { title: "Plan" };
 
 export default async function PlanPage() {
-  const { phases, unphased } = await getPlan();
+  const [{ phases, unphased }, links] = await Promise.all([
+    getPlan(),
+    getLinkOptions(),
+  ]);
   return (
     <>
       <PageHeader
@@ -25,7 +30,12 @@ export default async function PlanPage() {
           />
         }
       />
-      <PlanBoard phases={phases} unphased={unphased} />
+      <PlanBoard
+        phases={phases}
+        unphased={unphased}
+        links={links}
+        today={todayIso()}
+      />
     </>
   );
 }

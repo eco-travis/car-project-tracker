@@ -126,3 +126,18 @@ export async function seedJob(
   if (error) throw error;
   return data.id;
 }
+
+/** Inserts any row owned by `user` (service role; bypasses the UI). */
+export async function seedRow(
+  user: E2EUser,
+  table: "parts" | "tools" | "tasks" | "task_links" | "expenses" | "job_tools",
+  values: Record<string, unknown>,
+): Promise<string> {
+  const { data, error } = await adminClient()
+    .from(table)
+    .insert({ owner_id: user.id, ...values } as never)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return (data as { id?: string }).id ?? "";
+}

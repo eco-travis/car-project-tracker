@@ -7,7 +7,8 @@ const usd = new Intl.NumberFormat("en-US", {
 export function formatCents(cents: number): string {
   if (!Number.isSafeInteger(cents))
     throw new RangeError(`Cents must be a safe integer, got ${cents}`);
-  return usd.format(cents / 100);
+  // `+ 0` turns -0 into 0 so zero never renders as "-$0.00".
+  return usd.format(cents / 100 + 0);
 }
 
 /**

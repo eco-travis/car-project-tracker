@@ -42,3 +42,49 @@ export function options<T extends string>(
     label: labels[value],
   }));
 }
+
+export const PART_STATUS_LABELS = {
+  idea: "Idea",
+  researching: "Researching",
+  wishlist: "Wishlist",
+  ordered: "Ordered",
+  received: "Received",
+  installed: "Installed",
+  removed: "Removed",
+  sold: "Sold",
+  returned: "Returned",
+} as const;
+
+export const PART_CATEGORY_LABELS = {
+  suspension: "Suspension",
+  armor: "Armor",
+  lighting: "Lighting",
+  recovery: "Recovery",
+  electrical: "Electrical",
+  tires_wheels: "Tires/wheels",
+  interior: "Interior",
+  fluids: "Fluids",
+  other: "Other",
+} as const;
+
+export const TOOL_STATUS_LABELS = {
+  owned: "Owned",
+  borrowed: "Borrowed",
+  rented: "Rented",
+  need_to_buy: "Need to buy",
+} as const;
+
+export const EXPENSE_CATEGORY_LABELS = {
+  part: "Part",
+  tool: "Tool",
+  shop_labor_bay: "Shop labor or bay rental",
+  shipping_tax_fees: "Shipping/tax/fees",
+  fluids_consumables: "Fluids & consumables",
+  other: "Other",
+  sale: "Sale",
+} as const;
+
+export const EXPENSE_STATE_LABELS = {
+  committed: "Committed",
+  paid: "Paid",
+} as const;

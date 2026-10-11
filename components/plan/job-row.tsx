@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import { CostSummary, hasCosts } from "@/components/cost-summary";
 import { JobStatusBadge } from "@/components/jobs/status-badge";
 import type { PlanJob } from "@/lib/db/queries/plan";
 import { JOB_TYPE_LABELS } from "@/lib/labels";
@@ -43,7 +44,12 @@ export function JobRow({ job }: { job: PlanJob }) {
           </p>
         )}
       </div>
-      <JobStatusBadge status={job.status} />
+      <div className="flex flex-col items-start gap-1 sm:items-end">
+        <JobStatusBadge status={job.status} />
+        {hasCosts(job.costs) && (
+          <CostSummary costs={job.costs} compact className="sm:justify-end" />
+        )}
+      </div>
     </li>
   );
 }

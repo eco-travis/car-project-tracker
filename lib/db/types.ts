@@ -42,6 +42,12 @@ isOneToOne: false
       referencedRelation: "expenses"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "attachments_expense_id_fkey"
+      columns: ["expense_id"]
+isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "attachments_inspiration_id_fkey"
       columns: ["inspiration_id"]
 isOneToOne: false
@@ -57,7 +63,19 @@ isOneToOne: false
       foreignKeyName: "attachments_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "attachments_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "attachments_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "attachments_part_id_fkey"
@@ -66,11 +84,23 @@ isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "attachments_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
       foreignKeyName: "attachments_phase_id_fkey"
       columns: ["phase_id"]
 isOneToOne: false
       referencedRelation: "phases"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attachments_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "v_phase_costs"
+      referencedColumns: ["phase_id"]
     },{
       foreignKeyName: "attachments_task_id_fkey"
       columns: ["task_id"]
@@ -83,6 +113,18 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "tools"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attachments_tool_id_fkey"
+      columns: ["tool_id"]
+isOneToOne: false
+      referencedRelation: "v_tool_costs"
+      referencedColumns: ["tool_id"]
+    },{
+      foreignKeyName: "attachments_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "attachments_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -125,7 +167,19 @@ isOneToOne: false
       foreignKeyName: "expenses_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "expenses_part_id_fkey"
@@ -134,17 +188,41 @@ isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "expenses_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
       foreignKeyName: "expenses_phase_id_fkey"
       columns: ["phase_id"]
 isOneToOne: false
       referencedRelation: "phases"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "expenses_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "v_phase_costs"
+      referencedColumns: ["phase_id"]
+    },{
       foreignKeyName: "expenses_tool_id_fkey"
       columns: ["tool_id"]
 isOneToOne: false
       referencedRelation: "tools"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expenses_tool_id_fkey"
+      columns: ["tool_id"]
+isOneToOne: false
+      referencedRelation: "v_tool_costs"
+      referencedColumns: ["tool_id"]
+    },{
+      foreignKeyName: "expenses_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "expenses_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -175,7 +253,19 @@ isOneToOne: false
       foreignKeyName: "inspirations_promoted_job_id_fkey"
       columns: ["promoted_job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "inspirations_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "inspirations_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "inspirations_promoted_part_id_fkey"
@@ -183,6 +273,18 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "inspirations_promoted_part_id_fkey"
+      columns: ["promoted_part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
+      foreignKeyName: "inspirations_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "inspirations_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -213,7 +315,19 @@ isOneToOne: false
       foreignKeyName: "job_dependencies_blocked_by_job_id_fkey"
       columns: ["blocked_by_job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "job_dependencies_blocked_by_job_id_fkey"
+      columns: ["blocked_by_job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "job_dependencies_blocked_by_job_id_fkey"
+      columns: ["blocked_by_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "job_dependencies_job_id_fkey"
@@ -225,7 +339,19 @@ isOneToOne: false
       foreignKeyName: "job_dependencies_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "job_dependencies_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "job_dependencies_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     }
                   ]
@@ -251,7 +377,19 @@ isOneToOne: false
       foreignKeyName: "job_tools_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "job_tools_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "job_tools_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "job_tools_tool_id_fkey"
@@ -259,6 +397,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "tools"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_tools_tool_id_fkey"
+      columns: ["tool_id"]
+isOneToOne: false
+      referencedRelation: "v_tool_costs"
+      referencedColumns: ["tool_id"]
     }
                   ]
                 },"jobs": {
@@ -279,6 +423,18 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "phases"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "jobs_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "v_phase_costs"
+      referencedColumns: ["phase_id"]
+    },{
+      foreignKeyName: "jobs_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "jobs_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -309,7 +465,19 @@ isOneToOne: false
       foreignKeyName: "parts_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "parts_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "parts_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "parts_replaces_part_id_fkey"
@@ -317,6 +485,18 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parts_replaces_part_id_fkey"
+      columns: ["replaces_part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
+      foreignKeyName: "parts_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "parts_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -338,6 +518,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "phases_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
+    },{
       foreignKeyName: "phases_vehicle_id_fkey"
       columns: ["vehicle_id"]
 isOneToOne: false
@@ -367,7 +553,19 @@ isOneToOne: false
       foreignKeyName: "task_links_job_id_fkey"
       columns: ["job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "task_links_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "task_links_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
       referencedColumns: ["job_id"]
     },{
       foreignKeyName: "task_links_part_id_fkey"
@@ -376,11 +574,23 @@ isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "task_links_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
       foreignKeyName: "task_links_phase_id_fkey"
       columns: ["phase_id"]
 isOneToOne: false
       referencedRelation: "phases"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_links_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "v_phase_costs"
+      referencedColumns: ["phase_id"]
     },{
       foreignKeyName: "task_links_task_id_fkey"
       columns: ["task_id"]
@@ -411,6 +621,12 @@ isOneToOne: false
       foreignKeyName: "tasks_vehicle_id_fkey"
       columns: ["vehicle_id"]
 isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
+    },{
+      foreignKeyName: "tasks_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
       referencedRelation: "vehicles"
       referencedColumns: ["id"]
     }
@@ -428,6 +644,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "tools_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
+    },{
       foreignKeyName: "tools_vehicle_id_fkey"
       columns: ["vehicle_id"]
 isOneToOne: false
@@ -488,6 +710,12 @@ isOneToOne: false
       referencedRelation: "parts"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "watch_item_parts_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
       foreignKeyName: "watch_item_parts_watch_item_id_fkey"
       columns: ["watch_item_id"]
 isOneToOne: false
@@ -517,8 +745,26 @@ isOneToOne: false
       foreignKeyName: "watch_items_promoted_job_id_fkey"
       columns: ["promoted_job_id"]
 isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "watch_items_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
       referencedRelation: "v_job_blockers"
       referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "watch_items_promoted_job_id_fkey"
+      columns: ["promoted_job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "watch_items_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
     },{
       foreignKeyName: "watch_items_vehicle_id_fkey"
       columns: ["vehicle_id"]
@@ -530,9 +776,97 @@ isOneToOne: false
                 }
           }
           Views: {
-            "v_job_blockers": {
+            "v_expense_attribution": {
+                  Row: {
+                    "amount_cents": number | null,"bucket": string | null,"category": Database["public"]['Enums']["expense_category"] | null,"created_at": string | null,"effective_job_id": string | null,"effective_phase_id": string | null,"id": string | null,"job_id": string | null,"notes": string | null,"owner_id": string | null,"part_id": string | null,"phase_id": string | null,"spent_on": string | null,"state": Database["public"]['Enums']["expense_state"] | null,"tool_id": string | null,"updated_at": string | null,"vehicle_id": string | null,"vendor": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_expense_attribution"
+      referencedColumns: ["effective_job_id"]
+    },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_blockers"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "expenses_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "v_job_costs"
+      referencedColumns: ["job_id"]
+    },{
+      foreignKeyName: "expenses_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "parts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expenses_part_id_fkey"
+      columns: ["part_id"]
+isOneToOne: false
+      referencedRelation: "v_part_costs"
+      referencedColumns: ["part_id"]
+    },{
+      foreignKeyName: "expenses_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "phases"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expenses_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "v_phase_costs"
+      referencedColumns: ["phase_id"]
+    },{
+      foreignKeyName: "expenses_tool_id_fkey"
+      columns: ["tool_id"]
+isOneToOne: false
+      referencedRelation: "tools"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expenses_tool_id_fkey"
+      columns: ["tool_id"]
+isOneToOne: false
+      referencedRelation: "v_tool_costs"
+      referencedColumns: ["tool_id"]
+    },{
+      foreignKeyName: "expenses_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
+    },{
+      foreignKeyName: "expenses_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_job_blockers": {
                   Row: {
                     "job_id": string | null,"open_blockers": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_job_costs": {
+                  Row: {
+                    "budget_cents": number | null,"committed_cents": number | null,"job_id": string | null,"paid_cents": number | null,"remaining_cents": number | null
                   }
                   ComputedFields: never
                   Relationships: [
@@ -546,11 +880,46 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"v_part_costs": {
+                  Row: {
+                    "part_id": string | null,"sold_cents": number | null,"spent_cents": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_phase_costs": {
+                  Row: {
+                    "budget_cents": number | null,"committed_cents": number | null,"diy_hours": number | null,"paid_cents": number | null,"phase_id": string | null,"remaining_cents": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_tool_costs": {
+                  Row: {
+                    "spent_cents": number | null,"tool_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_vehicle_totals": {
+                  Row: {
+                    "build_cents": number | null,"committed_cents": number | null,"diy_hours": number | null,"ownership_cents": number | null,"paid_cents": number | null,"recovered_cents": number | null,"tools_cents": number | null,"total_invested_cents": number | null,"unassigned_cents": number | null,"vehicle_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
                 }
           }
           Functions: {
             "create_vehicle_with_phases":
 { Args: { "p_current_odometer"?: number,"p_generation"?: string,"p_model"?: string,"p_name": string,"p_phase_names": (string)[],"p_purchase_date"?: string,"p_purchase_price_cents"?: number,"p_vin"?: string,"p_year"?: number }; Returns: string
+                           },
+"record_part_sale":
+{ Args: { "p_notes"?: string,"p_part_id": string,"p_price_cents": number,"p_spent_on": string,"p_vendor"?: string }; Returns: string
                            },
 "reorder_phases":
 { Args: { "p_phase_ids": (string)[] }; Returns: undefined

@@ -190,6 +190,212 @@ await must(
   ]),
 );
 
+// Parts across the lifecycle. Parts with expenses are already past Wishlist, so the
+// rule 6 trigger leaves their statuses as seeded.
+type PartSeed = { key: string; job?: string } & Record<string, unknown>;
+const partSeeds: PartSeed[] = [
+  {
+    key: "atf",
+    job: "tcase",
+    name: "Transfer case fluid 1L",
+    brand: "Porsche",
+    category: "fluids",
+    status: "installed",
+    oem_part_number: "000 043 300 56",
+    vendor: "Sunset Porsche",
+    quantity: 1,
+  },
+  {
+    key: "pipes",
+    job: "coolant",
+    name: "Coolant pipe kit",
+    brand: "URO",
+    category: "other",
+    status: "received",
+    oem_part_number: "948-106-052-00",
+    superseded_numbers: ["948-106-052-01"],
+    vendor: "FCP Euro",
+    return_by: "2026-11-15",
+  },
+  {
+    key: "plugs",
+    job: "plugs",
+    name: "Spark plugs",
+    brand: "Bosch",
+    category: "other",
+    status: "ordered",
+    oem_part_number: "999-170-232-90",
+    vendor: "Pelican Parts",
+    quantity: 8,
+  },
+  {
+    key: "tires",
+    job: "tires",
+    name: "KO2 275/55R19",
+    brand: "BFGoodrich",
+    category: "tires_wheels",
+    status: "ordered",
+    vendor: "Tire Rack",
+    quantity: 5,
+  },
+  {
+    key: "spacers",
+    job: "lift",
+    name: "2in lift spacers",
+    brand: "Rennen",
+    category: "suspension",
+    status: "wishlist",
+    fitment_notes: "955/957 air suspension; Touareg cross-fit",
+    vendor: "Rennen",
+  },
+  {
+    key: "skid",
+    job: "skids",
+    name: "Front skid plate",
+    brand: "Rival",
+    category: "armor",
+    status: "idea",
+  },
+  {
+    key: "battery",
+    job: "battery",
+    name: "Dual battery kit",
+    brand: "Redarc",
+    category: "electrical",
+    status: "researching",
+  },
+  {
+    key: "wheels",
+    name: "Stock 18in wheels",
+    brand: "Porsche",
+    category: "tires_wheels",
+    status: "removed",
+    notes: "Came off for the KO2s.",
+  },
+];
+const parts = await must(
+  admin
+    .from("parts")
+    .insert(
+      partSeeds.map(({ key: _k, job: j, ...p }) => ({
+        // Bulk inserts send the union of keys; fill not-null columns explicitly.
+        superseded_numbers: [],
+        quantity: 1,
+        ...p,
+        owner_id,
+        vehicle_id,
+        job_id: j ? job(j) : null,
+      })) as never,
+    )
+    .select("id, name"),
+);
+const part = (key: string) =>
+  parts.find((p) => p.name === partSeeds.find((s) => s.key === key)!.name)!.id;
+
+const tools = await must(
+  admin
+    .from("tools")
+    .insert([
+      {
+        owner_id,
+        vehicle_id,
+        name: "27mm triple-square socket",
+        status: "owned",
+        storage_location: "Drawer 2",
+      },
+      {
+        owner_id,
+        vehicle_id,
+        name: "Coolant pressure tester",
+        status: "borrowed",
+        storage_location: "Shelf A",
+      },
+      { owner_id, vehicle_id, name: "Ball joint press", status: "need_to_buy" },
+    ])
+    .select("id, name"),
+);
+const tool = (name: string) => tools.find((t) => t.name === name)!.id;
+await must(
+  admin.from("job_tools").insert([
+    {
+      owner_id,
+      job_id: job("tcase"),
+      tool_id: tool("27mm triple-square socket"),
+    },
+    {
+      owner_id,
+      job_id: job("coolant"),
+      tool_id: tool("Coolant pressure tester"),
+    },
+    { owner_id, job_id: job("lift"), tool_id: tool("Ball joint press") },
+  ]),
+);
+
+const expense = (o: Record<string, unknown>) =>
+  ({ owner_id, vehicle_id, state: "paid", ...o }) as never;
+await must(
+  admin.from("expenses").insert([
+    expense({
+      spent_on: "2026-08-22",
+      amount_cents: 8900,
+      category: "fluids_consumables",
+      vendor: "Pelican Parts",
+      job_id: job("oil"),
+    }),
+    expense({
+      spent_on: "2026-09-04",
+      amount_cents: 4200,
+      category: "part",
+      vendor: "Sunset Porsche",
+      part_id: part("atf"),
+    }),
+    expense({
+      spent_on: "2026-09-12",
+      amount_cents: 38900,
+      category: "part",
+      vendor: "FCP Euro",
+      part_id: part("pipes"),
+    }),
+    expense({
+      spent_on: "2026-09-20",
+      amount_cents: 11200,
+      category: "part",
+      vendor: "Pelican Parts",
+      part_id: part("plugs"),
+      state: "committed",
+    }),
+    expense({
+      spent_on: "2026-09-28",
+      amount_cents: 46000,
+      category: "shop_labor_bay",
+      vendor: "Eastside Euro",
+      job_id: job("brakes"),
+    }),
+    expense({
+      spent_on: "2026-10-01",
+      amount_cents: 162500,
+      category: "part",
+      vendor: "Tire Rack",
+      part_id: part("tires"),
+      state: "committed",
+    }),
+    expense({
+      spent_on: "2026-09-02",
+      amount_cents: 6400,
+      category: "tool",
+      vendor: "Amazon",
+      tool_id: tool("27mm triple-square socket"),
+    }),
+    expense({
+      spent_on: "2026-09-15",
+      amount_cents: 2500,
+      category: "shipping_tax_fees",
+      vendor: "FCP Euro",
+      phase_id: phases.find((p) => p.name === "Baseline maintenance")!.id,
+    }),
+  ]),
+);
+
 // The trigger only fires on writes, so set the odometer explicitly after inserting history.
 await must(
   admin
@@ -200,5 +406,5 @@ await must(
 );
 
 console.log(
-  `Seeded ${phases.length} phases and ${jobs.length} jobs for ${email}.`,
+  `Seeded ${phases.length} phases, ${jobs.length} jobs, ${parts.length} parts, and ${tools.length} tools for ${email}.`,
 );

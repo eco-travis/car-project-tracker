@@ -105,3 +105,28 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - E2E sets `DEV_AUTO_LOGIN=0`, so tests still exercise the real sign-in gate.
 - E2E builds into `.next-e2e` (`NEXT_DIST_DIR`) because Next 16 allows only one dev server per build dir; tests can now run while `npm run dev` is up on :3000.
 - Never set these in Vercel. The production deploy ignores them anyway because `NODE_ENV` is `production`.
+
+## M3 — Parts, tools, money (2026-10-10)
+
+**Shipped:** Parts list (status filter and search across name, brand, vendor, and every part number including superseded, with or without dashes) and detail with every spec field; linking parts to jobs and replaced parts; Tools list (by status, then location) with job links; one expense ledger, added from a part, tool, job, phase, or the vehicle page, with Mark paid, edit, and delete; Record sale; budget, committed, paid, remaining, and overage on jobs, phases, and the vehicle; the cost views.
+
+**Acceptance:** all three criteria pass.
+
+- Rules 6–13 are pure functions in `lib/domain/parts.ts` and `lib/domain/costs.ts` with unit tests.
+- Every new view (`v_expense_attribution`, `v_job_costs`, `v_phase_costs`, `v_vehicle_totals`, `v_part_costs`) has a DB test that compares it to the domain functions on the same fixture ledger and to hand-computed values.
+- Job detail and Plan (phase headers and job rows) show budget, committed, paid, remaining, and the overage ("Over by $50.00").
+- Flow 3 (`tests/e2e/order-a-part.spec.ts`) and flow 6 (`tests/e2e/sell-a-part.spec.ts`) pass at both viewports, on dev and on a production build.
+
+**Decisions**
+
+- **Vehicle buckets (build, ownership, tools, recovered, unassigned) count paid money only.** Committed spend is shown as its own line ("Committed, not yet paid"), and Total invested = purchase price + all paid (rule 11). The spec defines Total invested on Paid, so the buckets match it. Revisit if you'd rather see build cost including committed.
+- **Part-only expenses** count toward the part's job and phase everywhere (views, job page, plan), per the spec decision. The job page lists them with the job's own expenses.
+- **Rule 6 runs as a trigger** (`expenses_mark_part_ordered`) on expense insert, the same pattern as the odometer. It only advances Idea, Researching, and Wishlist parts.
+- **Rule 7 runs in `record_part_sale`**, an RPC that writes the negative paid Sale expense and marks the part Sold in one transaction. It re-checks Removed under a row lock. The ledger form doesn't offer the Sale category, and Sale entries can't be edited, only deleted.
+- **An expense added from a part defaults to Committed** (flow 3 says it "adds a Committed line"). Everywhere else it defaults to Paid.
+- **The phase "Missing" line** now lists parts not ordered, tools to buy, and blocked jobs, counting only open jobs. Blocking tasks join it in M5 (they already count as blockers).
+- **Build cost is shown with and without tools** (spec cost rule 4). Recovered is shown as a positive amount on its own line (spec cost rule 2).
+- **Destructive actions on money records** (deleting an expense, part, or tool) go through a confirmation dialog.
+- **Record sale stays mounted after the sale.** The part becomes Sold on refresh; unmounting the dialog had swallowed the "mark linked tasks done?" follow-up.
+- **`formatCents` normalizes −0**, which had rendered as "-$0.00".
+- **The demo seed now includes** 8 parts across the lifecycle, 3 tools (one Need to buy), and 8 expenses (two committed), so every money screen has data locally.

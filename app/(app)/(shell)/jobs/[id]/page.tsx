@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Plus } from "lucide-react";
 import { z } from "zod";
 import { CompletionDialog } from "@/components/jobs/completion-dialog";
 import { DeleteJobButton } from "@/components/jobs/delete-job-button";
 import { DependenciesPanel } from "@/components/jobs/dependencies-panel";
 import { StatusControl } from "@/components/jobs/status-control";
-import { Money } from "@/components/money";
+import { CostSummary } from "@/components/cost-summary";
+import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
+import { ExpenseList } from "@/components/expenses/expense-list";
+import { JobPartsPanel } from "@/components/jobs/job-parts-panel";
+import { JobToolsPanel } from "@/components/jobs/job-tools-panel";
 import { JobFormDialog } from "@/components/plan/job-form-dialog";
 import { Button } from "@/components/ui/button";
 import { requireVehicle } from "@/lib/auth";
 import { getJob } from "@/lib/db/queries/jobs";
+import { getLinkOptions } from "@/lib/db/queries/options";
 import { getPhaseOptions } from "@/lib/db/queries/plan";
+import { formatHours } from "@/lib/domain/costs";
 import { todayIso } from "@/lib/domain/dates";
 import { completionDefaults } from "@/lib/domain/jobs";
 import { formatDate, formatMiles } from "@/lib/format";
@@ -29,14 +36,16 @@ export async function generateMetadata({
 export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const [data, phases, vehicle] = await Promise.all([
+  const [data, phases, vehicle, links] = await Promise.all([
     getJob(id),
     getPhaseOptions(),
     requireVehicle(),
+    getLinkOptions(),
   ]);
   if (!data) notFound();
   const { job } = data;
-  const defaults = completionDefaults(todayIso(), vehicle.current_odometer);
+  const today = todayIso();
+  const defaults = completionDefaults(today, vehicle.current_odometer);
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -99,6 +108,71 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
         )}
       </section>
 
+      <section
+        aria-labelledby="costs-heading"
+        className="rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="costs-heading" className="font-semibold">
+            Costs
+          </h2>
+          <ExpenseFormDialog
+            options={links}
+            today={today}
+            preset={{ job_id: job.id }}
+            trigger={
+              <Button variant="outline" size="sm">
+                <Plus aria-hidden /> Add expense
+              </Button>
+            }
+          />
+        </div>
+        <CostSummary costs={data.costs} />
+        {job.diy_hours !== null && (
+          <p className="text-muted-foreground mt-2 text-sm">
+            DIY labor: {formatHours(job.diy_hours)} (not counted as money)
+          </p>
+        )}
+        <div className="mt-4">
+          <ExpenseList
+            expenses={data.expenses}
+            options={links}
+            today={today}
+            hide={["job"]}
+          />
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="parts-heading"
+        className="rounded-xl border p-4"
+      >
+        <h2 id="parts-heading" className="mb-3 font-semibold">
+          Parts
+        </h2>
+        <JobPartsPanel
+          jobId={job.id}
+          parts={data.parts}
+          candidates={data.partCandidates}
+          jobs={links.jobs}
+          allParts={links.parts}
+        />
+      </section>
+
+      <section
+        aria-labelledby="tools-heading"
+        className="rounded-xl border p-4"
+      >
+        <h2 id="tools-heading" className="mb-3 font-semibold">
+          Tools needed
+        </h2>
+        <JobToolsPanel
+          jobId={job.id}
+          tools={data.tools}
+          candidates={data.toolCandidates}
+        />
+      </section>
+
       <section aria-labelledby="deps-heading" className="rounded-xl border p-4">
         <h2 id="deps-heading" className="mb-3 font-semibold">
           Dependencies
@@ -120,11 +194,6 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
           Details
         </h2>
         <dl className="flex flex-col gap-3 text-sm">
-          {job.budget_cents !== null && (
-            <Detail label="Budget">
-              <Money cents={job.budget_cents} />
-            </Detail>
-          )}
           <Detail label="Description">{job.description ?? "—"}</Detail>
           <Detail label="Notes">
             <span className="whitespace-pre-wrap">{job.notes ?? "—"}</span>

@@ -8,6 +8,10 @@ describe("formatCents", () => {
     expect(formatCents(-4999)).toBe("-$49.99");
   });
 
+  it("never renders negative zero", () => {
+    expect(formatCents(-0)).toBe("$0.00");
+  });
+
   it("rejects non-integer input", () => {
     expect(() => formatCents(1.5)).toThrow(RangeError);
   });

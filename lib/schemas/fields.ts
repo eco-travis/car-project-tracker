@@ -120,3 +120,40 @@ export const urlLines = z.string().transform((s, ctx) => {
   }
   return lines;
 });
+
+/** Required YYYY-MM-DD date. */
+export const requiredDate = optionalDate
+  .refine((d) => d !== null, "Enter a date.")
+  .transform((d) => d!);
+
+/** Required non-zero dollar amount -> cents. */
+export function requiredMoney(label: string, { allowNegative = false } = {}) {
+  return optionalMoney(label, { allowNegative })
+    .refine((c) => c !== null, `Enter the ${label.toLowerCase()}.`)
+    .refine((c) => c !== 0, `${label} can't be zero.`)
+    .transform((c) => c!);
+}
+
+/** Comma- or newline-separated list -> trimmed, de-duplicated string[]. */
+export const textList = z.string().transform((s) => [
+  ...new Set(
+    s
+      .split(/[,\n]/)
+      .map((x) => x.trim())
+      .filter(Boolean),
+  ),
+]);
+
+/** Blank -> null, otherwise an http(s) URL. */
+export const optionalUrl = z
+  .string()
+  .trim()
+  .transform((s) => (s === "" ? null : s))
+  .pipe(
+    z
+      .url({
+        protocol: /^https?$/,
+        message: "Enter a full link starting with https://",
+      })
+      .nullable(),
+  );

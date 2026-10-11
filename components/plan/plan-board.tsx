@@ -20,11 +20,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
-import { Money } from "@/components/money";
+import { CostSummary } from "@/components/cost-summary";
+import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { reorderPhases } from "@/lib/actions/phases";
+import type { LinkOptions } from "@/lib/db/queries/options";
 import type { PlanJob, PlanPhase } from "@/lib/db/queries/plan";
+import { formatHours } from "@/lib/domain/costs";
 import { reorderIds } from "@/lib/domain/phases";
 import { formatDate } from "@/lib/format";
 import { PHASE_STATUS_LABELS } from "@/lib/labels";
@@ -43,9 +46,13 @@ const screenReaderInstructions = {
 export function PlanBoard({
   phases,
   unphased,
+  links,
+  today,
 }: {
   phases: PlanPhase[];
   unphased: PlanJob[];
+  links: LinkOptions;
+  today: string;
 }) {
   // Optimistic order while a reorder saves; reverts to server order if it fails.
   const [order, setOrder] = useOptimistic(phases.map((p) => p.id));
@@ -123,6 +130,8 @@ export function PlanBoard({
                   phase={phase}
                   position={index + 1}
                   phaseOptions={phaseOptions}
+                  links={links}
+                  today={today}
                 />
               ) : null;
             })}
@@ -160,10 +169,14 @@ function SortablePhase({
   phase,
   position,
   phaseOptions,
+  links,
+  today,
 }: {
   phase: PlanPhase;
   position: number;
   phaseOptions: PhaseOption[];
+  links: LinkOptions;
+  today: string;
 }) {
   const {
     attributes,
@@ -176,7 +189,7 @@ function SortablePhase({
   } = useSortable({
     id: phase.id,
   });
-  const blocked = phase.jobs.filter((j) => visibleBlockers(j).length > 0);
+  const missing = whatsMissing(phase.jobs);
   const headingId = `phase-${phase.id}`;
 
   return (
@@ -211,14 +224,6 @@ function SortablePhase({
               </Badge>
             </div>
             <dl className="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              {phase.budget_cents !== null && (
-                <div className="flex gap-1">
-                  <dt>Budget</dt>
-                  <dd>
-                    <Money cents={phase.budget_cents} />
-                  </dd>
-                </div>
-              )}
               {(phase.target_start || phase.target_end) && (
                 <div className="flex gap-1">
                   <dt>Target</dt>
@@ -232,14 +237,17 @@ function SortablePhase({
                 <dt>Jobs</dt>
                 <dd>{phase.jobs.length}</dd>
               </div>
+              {phase.diyHours > 0 && (
+                <div className="flex gap-1">
+                  <dt>DIY</dt>
+                  <dd>{formatHours(phase.diyHours)}</dd>
+                </div>
+              )}
             </dl>
-            {blocked.length > 0 && (
+            <CostSummary costs={phase.costs} compact className="mt-1" />
+            {missing.length > 0 && (
               <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
-                Missing:{" "}
-                {blocked.length === 1
-                  ? "1 job is"
-                  : `${blocked.length} jobs are`}{" "}
-                blocked
+                Missing: {missing.join(" · ")}
               </p>
             )}
             {phase.description && (
@@ -260,6 +268,21 @@ function SortablePhase({
                   aria-label={`Add job to ${phase.name}`}
                 >
                   <Plus aria-hidden /> Add job
+                </Button>
+              }
+            />
+            <ExpenseFormDialog
+              options={links}
+              today={today}
+              title={`Add expense to ${phase.name}`}
+              preset={{ phase_id: phase.id }}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Add expense to ${phase.name}`}
+                >
+                  Add expense
                 </Button>
               }
             />
@@ -286,6 +309,25 @@ function SortablePhase({
       </section>
     </li>
   );
+}
+
+/** Flow 5: what the phase still needs before its jobs can go ahead. */
+function whatsMissing(jobs: PlanJob[]): string[] {
+  const open = jobs.filter(
+    (j) => j.status !== "done" && j.status !== "cancelled",
+  );
+  const parts = new Set(
+    open.flatMap((j) => j.partsNotOrdered.map((p) => p.id)),
+  );
+  const tools = new Set(open.flatMap((j) => j.toolsToBuy.map((t) => t.id)));
+  const blocked = open.filter((j) => visibleBlockers(j).length > 0).length;
+  const plural = (n: number, one: string, many: string) =>
+    n === 1 ? `1 ${one}` : `${n} ${many}`;
+  return [
+    parts.size && `${plural(parts.size, "part", "parts")} not ordered`,
+    tools.size && `${plural(tools.size, "tool", "tools")} to buy`,
+    blocked && `${plural(blocked, "job is", "jobs are")} blocked`,
+  ].filter(Boolean) as string[];
 }
 
 function JobList({ jobs }: { jobs: PlanJob[] }) {
