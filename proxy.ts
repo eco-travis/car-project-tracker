@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { buildCsp } from "@/lib/csp";
+import { devAutoLoginEnabled } from "@/lib/dev-login";
 import { publicEnv } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/auth/dev-login"];
 
 export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -62,8 +63,12 @@ export async function proxy(request: NextRequest) {
         csp,
       );
     }
+    // Local testing convenience; see lib/dev-login.ts for the guards.
+    const target = devAutoLoginEnabled()
+      ? `/auth/dev-login?next=${encodeURIComponent(pathname + request.nextUrl.search)}`
+      : "/login";
     return withSecurityHeaders(
-      redirectWithCookies(request, response, "/login"),
+      redirectWithCookies(request, response, target),
       csp,
     );
   }

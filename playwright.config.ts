@@ -44,6 +44,8 @@ export default defineConfig({
       ? `npx next build && npx next start --port ${port}`
       : `npm run dev -- --port ${port}`,
     url: `http://localhost:${port}`,
+    // Tests exercise the real sign-in gate; process env wins over .env.local.
+    env: { DEV_AUTO_LOGIN: "0", NEXT_DIST_DIR: ".next-e2e" },
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
   },

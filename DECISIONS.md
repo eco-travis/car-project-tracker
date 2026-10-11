@@ -96,3 +96,12 @@ Travis chose to build and preview locally and deploy later. Changes to the plan'
 - **The dnd-kit `DndContext` has a fixed `id`.** Its generated ids come from a module-level counter that drifts between server and client, which caused intermittent hydration mismatches. The e2e fixture now fails any test that logs a hydration error, and I confirmed it catches this one.
 - **E2E waits for hydration** after every full page load (`html[data-hydrated]`), because typing into a not-yet-hydrated input lost keystrokes.
 - **Next's dev indicator is off**: every corner collided with app chrome. The error overlay still appears.
+
+## Dev auto sign-in (2026-10-10)
+
+Travis asked to skip the magic link during local testing. `npm run dev` now signs in automatically as `ALLOWED_EMAIL` when **all** of these hold (`lib/dev-login.ts`, unit-tested): `NODE_ENV=development` (so never in a production build), `DEV_AUTO_LOGIN=1`, `DEV_LOGIN_PASSWORD` set, and a Supabase URL on localhost. Unauthenticated requests redirect to `/auth/dev-login?next=…`, which uses password sign-in with the anon key (no service key in the app) and returns 404 when disabled.
+
+- `DEV_AUTO_LOGIN` and `DEV_LOGIN_PASSWORD` live only in the gitignored `.env.local`. `npm run db:dev-password` sets that password on the local user, and `npm run db:reset` runs it automatically.
+- E2E sets `DEV_AUTO_LOGIN=0`, so tests still exercise the real sign-in gate.
+- E2E builds into `.next-e2e` (`NEXT_DIST_DIR`) because Next 16 allows only one dev server per build dir; tests can now run while `npm run dev` is up on :3000.
+- Never set these in Vercel. The production deploy ignores them anyway because `NODE_ENV` is `production`.
