@@ -226,3 +226,19 @@ export async function getInspirationCovers(): Promise<
   }
   return result;
 }
+
+/** Dashboard: the most recent highlighted photo (never inspiration media). */
+export async function getLatestHighlight(): Promise<MediaItem | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("v_attachment_details")
+    .select(SELECT)
+    .eq("highlight", true)
+    .eq("kind", "photo")
+    .is("inspiration_id", null)
+    .order("taken_at", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  const [item] = await toMediaItems(data as Row[]);
+  return item ?? null;
+}

@@ -199,3 +199,20 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **Covers** come from one batch query and one URL-signing call for the whole board (no per-card queries).
 - **Inspiration images stay out of the Gallery** (M4 query); the e2e for flow 4 re-checks it.
 - **The demo seed adds** 3 ideas, one already promoted to the lift spacers part.
+
+## M7 — Dashboard (2026-10-11)
+
+**Shipped:** the dashboard as specified: money (total invested, build, ownership, tools, recovered, committed), the active phase's budget bar, jobs Ready or Waiting on parts, parts arriving (Ordered), watch items due or overdue, open tasks due within 7 days, quick odometer update, and the latest highlight photo (opens the carousel). Every card's heading links to its screen.
+
+**Acceptance**
+
+- ✅ With the seed data, each card shows the expected values, asserted in `tests/e2e/dashboard.spec.ts`. The test loads the same demo build as `npm run db:seed`; expected figures are worked out by hand from the seed in the test comments.
+- ⏳ "Under 1 second on a warm Vercel deployment" can't be checked until we deploy. On a local production build (`next start`, local Supabase) warm loads were ~60 ms, with ~33 ms to first byte. Re-check after deploy; listed in `docs/STATUS.md`.
+
+**Decisions**
+
+- **The demo seed is now a function** (`tests/support/demo-data.ts`, `seedDemo(admin, ownerId)`) shared by `npm run db:seed` and the dashboard e2e. Time-sensitive dates (watch follow-ups, task due dates, the check-in) are relative to today, so the expected values don't drift with the calendar.
+- **Active phase** = the first phase with status Active in plan order. With none, the card says so and links to the Plan.
+- **Budget bar** (`lib/domain/dashboard.ts`, unit-tested): paid and committed segments against the budget. When over budget the bar scales to total spend and a red segment shows the overage. Its accessible name states the percent of budget used.
+- **"Tasks due this week"** = open tasks due within the next 7 days, overdue ones included (shown in red); same rule as `dueWithin()`.
+- **The parts card links** to `/parts?status=ordered`, and the highlight card to `/gallery?highlights=1`.

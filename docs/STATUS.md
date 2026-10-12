@@ -2,7 +2,7 @@
 
 What's built versus what's left, against `docs/spec.md` and `docs/plan.md`. **Update this file at the end of every milestone** (see `CLAUDE.md`). Details and rationale live in `DECISIONS.md`.
 
-_Last updated: 2026-10-11, after M6._
+_Last updated: 2026-10-11, after M7._
 
 ## Milestones
 
@@ -15,8 +15,8 @@ _Last updated: 2026-10-11, after M6._
 | M4 Media, quick-add, Gallery | ✅ Done | `48415f3` |
 | M5 Watch list and tasks | ✅ Done | `607f893` |
 | M6 Inspiration | ✅ Done | `3d04945` |
-| M7 Dashboard | ⏳ Next | |
-| M8 Exports | ⬜ Not started | |
+| M7 Dashboard | ✅ Done | see git log (`M7:`) |
+| M8 Exports | ⏳ Next | |
 | M9 Hardening | ⬜ Not started | |
 
 ## Spec key flows (e2e at phone and desktop)
@@ -52,7 +52,7 @@ _Last updated: 2026-10-11, after M6._
 
 | Screen | Status | Notes |
 | --- | --- | --- |
-| Dashboard | ⬜ M7 | Placeholder page |
+| Dashboard | ✅ | All cards per spec; e2e asserts values with the demo seed |
 | Plan | ✅ | Phase headers need a tidier action menu (M9) |
 | Job detail | ✅ | |
 | Work Log | ✅ | |
@@ -76,6 +76,8 @@ _Last updated: 2026-10-11, after M6._
 
 ## Deferred / known follow-ups
 
+- Confirm the dashboard loads in under 1 s on the warm Vercel deployment (local production build: ~60 ms warm).
+
 - Phase header has seven actions; fold secondary ones into a menu (M9).
 - Empty, loading, and error states for every screen (M9).
 - PWA manifest and icons (M9).
@@ -97,5 +99,5 @@ _Last updated: 2026-10-11, after M6._
 
 ## Test totals (last full run)
 
-- Unit + database (Vitest): 198
-- End-to-end (Playwright, desktop + phone): 67, passing on dev and on a production build
+- Unit + database (Vitest): 203
+- End-to-end (Playwright, desktop + phone): 73, passing on dev and on a production build
