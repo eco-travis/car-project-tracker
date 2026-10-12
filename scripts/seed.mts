@@ -496,6 +496,39 @@ await task("Ask forum about 957 sway links on 955", null, [
   { watch_item_id: watchId("Clunk") },
 ]);
 
+// Inspiration: three ideas, one already promoted to the lift spacers part.
+await must(
+  admin.from("inspirations").insert([
+    {
+      owner_id,
+      vehicle_id,
+      title: "Rival skid plate set",
+      source_url: "https://www.rival4x4.com/",
+      tags: ["armor"],
+      notes: "Aluminum, bolts to factory points.",
+      promoted_part_id: null,
+    },
+    {
+      owner_id,
+      vehicle_id,
+      title: "Roof-top tent build on a 955",
+      source_url: "https://rennlist.com/forums/cayenne-955-957/",
+      tags: ["sleep system", "roof"],
+      notes: "Check roof load rating first.",
+      promoted_part_id: null,
+    },
+    {
+      owner_id,
+      vehicle_id,
+      title: "2in lift spacer write-up",
+      source_url: "https://rennlist.com/forums/",
+      tags: ["suspension"],
+      notes: null,
+      promoted_part_id: part("spacers"),
+    },
+  ] as never),
+);
+
 // The trigger only fires on writes, so set the odometer explicitly after inserting history.
 await must(
   admin
@@ -506,5 +539,5 @@ await must(
 );
 
 console.log(
-  `Seeded ${phases.length} phases, ${jobs.length} jobs, ${parts.length} parts, ${tools.length} tools, ${watch.length} watch items, and 3 tasks for ${email}.`,
+  `Seeded ${phases.length} phases, ${jobs.length} jobs, ${parts.length} parts, ${tools.length} tools, ${watch.length} watch items, 3 tasks, and 3 ideas for ${email}.`,
 );

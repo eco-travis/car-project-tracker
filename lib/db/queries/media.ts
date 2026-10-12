@@ -193,3 +193,36 @@ export async function getGalleryPage(filters: GalleryFilters, cursor?: string) {
       rows.length > GALLERY_PAGE_SIZE ? encodeCursor(items.at(-1)!) : null,
   };
 }
+
+/** Inspiration board: each card's first photo (cover) and file count, in one query + one signing batch. */
+export async function getInspirationCovers(): Promise<
+  Map<string, { cover: MediaItem | null; count: number }>
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("v_attachment_details")
+    .select(`${SELECT}, inspiration_id`)
+    .not("inspiration_id", "is", null)
+    .order("taken_at")
+    .order("id");
+  if (error) throw error;
+  const rows = data as (Row & { inspiration_id: string })[];
+  const counts = new Map<string, number>();
+  const firstPhoto = new Map<string, Row & { inspiration_id: string }>();
+  for (const r of rows) {
+    counts.set(r.inspiration_id, (counts.get(r.inspiration_id) ?? 0) + 1);
+    if (r.kind === "photo" && !firstPhoto.has(r.inspiration_id))
+      firstPhoto.set(r.inspiration_id, r);
+  }
+  const covers = await toMediaItems([...firstPhoto.values()]);
+  const byId = new Map(covers.map((c) => [c.id, c]));
+  const result = new Map<string, { cover: MediaItem | null; count: number }>();
+  for (const [inspId, count] of counts) {
+    const row = firstPhoto.get(inspId);
+    result.set(inspId, {
+      cover: row ? (byId.get(row.id!) ?? null) : null,
+      count,
+    });
+  }
+  return result;
+}

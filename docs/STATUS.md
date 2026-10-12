@@ -2,7 +2,7 @@
 
 What's built versus what's left, against `docs/spec.md` and `docs/plan.md`. **Update this file at the end of every milestone** (see `CLAUDE.md`). Details and rationale live in `DECISIONS.md`.
 
-_Last updated: 2026-10-11, after M5._
+_Last updated: 2026-10-11, after M6._
 
 ## Milestones
 
@@ -14,8 +14,8 @@ _Last updated: 2026-10-11, after M5._
 | M3 Parts, tools, money | ✅ Done | `15b97a5` |
 | M4 Media, quick-add, Gallery | ✅ Done | `48415f3` |
 | M5 Watch list and tasks | ✅ Done | `607f893` |
-| M6 Inspiration | ⏳ Next | |
-| M7 Dashboard | ⬜ Not started | |
+| M6 Inspiration | ✅ Done | see git log (`M6:`) |
+| M7 Dashboard | ⏳ Next | |
 | M8 Exports | ⬜ Not started | |
 | M9 Hardening | ⬜ Not started | |
 
@@ -26,7 +26,7 @@ _Last updated: 2026-10-11, after M5._
 | 1 | Quick add from phone | ✅ | `tests/e2e/media.spec.ts` |
 | 2 | Mark job done | ✅ | `tests/e2e/mark-job-done.spec.ts` |
 | 3 | Order a part | ✅ | `tests/e2e/order-a-part.spec.ts` |
-| 4 | Promote inspiration | ⬜ M6 | |
+| 4 | Promote inspiration | ✅ | `tests/e2e/inspiration.spec.ts` |
 | 5 | Plan a phase | ✅ | `tests/e2e/plan-a-phase.spec.ts`, `order-a-part.spec.ts` (missing parts/tools) |
 | 6 | Sell a removed part | ✅ | `tests/e2e/sell-a-part.spec.ts` |
 | 7 | Add a watch item | ✅ | `tests/e2e/watch-and-tasks.spec.ts` |
@@ -44,7 +44,7 @@ _Last updated: 2026-10-11, after M5._
 | 9–13 | Money: committed/paid/remaining, rollups, buckets, overage, DIY hours | ✅ |
 | 14 | Odometer (done jobs and check-ins) | ✅ |
 | 15–18 | Watch items: due/overdue, relative follow-ups, promote, resolve/dismiss | ✅ |
-| 19 | Inspiration promote | ⬜ M6 |
+| 19 | Inspiration promote | ✅ |
 | 20 | Tasks never change other records | ✅ |
 | 21–22 | Phases: seeding, delete keeps jobs | ✅ |
 
@@ -61,7 +61,7 @@ _Last updated: 2026-10-11, after M5._
 | Tasks | ✅ | |
 | Parts (+ part page) | ✅ | |
 | Tools | ✅ | |
-| Inspiration | ⬜ M6 | Placeholder page |
+| Inspiration | ✅ | Cards, tag filter, images, promote to part or job |
 | Vehicle | ✅ | Money summary, ledger, notes, odometer, files |
 | Global quick-add | ✅ | Photo / Watch item / Task |
 
@@ -97,5 +97,5 @@ _Last updated: 2026-10-11, after M5._
 
 ## Test totals (last full run)
 
-- Unit + database (Vitest): 190
-- End-to-end (Playwright, desktop + phone): 61, passing on dev and on a production build
+- Unit + database (Vitest): 198
+- End-to-end (Playwright, desktop + phone): 67, passing on dev and on a production build

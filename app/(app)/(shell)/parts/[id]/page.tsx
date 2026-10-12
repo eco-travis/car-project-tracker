@@ -16,6 +16,7 @@ import { RecordSaleDialog } from "@/components/parts/record-sale-dialog";
 import { Button } from "@/components/ui/button";
 import { deletePart } from "@/lib/actions/parts";
 import { getAttachmentsFor } from "@/lib/db/queries/media";
+import { getInspirationSources } from "@/lib/db/queries/inspiration";
 import { getLinkOptions } from "@/lib/db/queries/options";
 import { getTaskLinkOptions, getTasksFor } from "@/lib/db/queries/tasks";
 import { getPart } from "@/lib/db/queries/parts";
@@ -39,9 +40,10 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
     getLinkOptions(),
     getAttachmentsFor({ kind: "part", id }),
   ]);
-  const [tasks, taskOptions] = await Promise.all([
+  const [tasks, taskOptions, inspirations] = await Promise.all([
     getTasksFor("part", id),
     getTaskLinkOptions(),
+    getInspirationSources("part", id),
   ]);
   if (!data) notFound();
   const { part } = data;
@@ -66,6 +68,18 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
             / {PART_CATEGORY_LABELS[part.category]}
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {inspirations.length > 0 && (
+            <p className="text-muted-foreground text-sm">
+              {inspirations.map((i, n) => (
+                <span key={i.id}>
+                  {n === 0 ? "From idea " : ", "}
+                  <Link href="/inspiration" className="underline">
+                    {i.title}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          )}
           {part.quantity > 1 && (
             <p className="text-muted-foreground text-sm">
               Quantity {part.quantity}

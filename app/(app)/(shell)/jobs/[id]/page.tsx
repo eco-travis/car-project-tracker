@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { requireVehicle } from "@/lib/auth";
 import { getJob } from "@/lib/db/queries/jobs";
 import { getAttachmentsFor } from "@/lib/db/queries/media";
+import { getInspirationSources } from "@/lib/db/queries/inspiration";
 import { getLinkOptions } from "@/lib/db/queries/options";
 import { getTaskLinkOptions, getTasksFor } from "@/lib/db/queries/tasks";
 import { getPromotedFrom } from "@/lib/db/queries/watch";
@@ -50,10 +51,11 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
     getLinkOptions(),
     getAttachmentsFor({ kind: "job", id }),
   ]);
-  const [tasks, taskOptions, promotedFrom] = await Promise.all([
+  const [tasks, taskOptions, promotedFrom, inspirations] = await Promise.all([
     getTasksFor("job", id),
     getTaskLinkOptions(),
     getPromotedFrom(id),
+    getInspirationSources("job", id),
   ]);
   if (!data) notFound();
   const { job } = data;
@@ -73,6 +75,14 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
           <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
           <p className="text-muted-foreground text-sm">
             {JOB_TYPE_LABELS[job.type]}
+            {inspirations.map((i) => (
+              <span key={i.id}>
+                {" · From idea "}
+                <Link href="/inspiration" className="underline">
+                  {i.title}
+                </Link>
+              </span>
+            ))}
             {promotedFrom && (
               <>
                 {" · From watch item "}

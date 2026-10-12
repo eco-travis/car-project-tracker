@@ -1087,6 +1087,12 @@ isOneToOne: false
 "create_vehicle_with_phases":
 { Args: { "p_current_odometer"?: number,"p_generation"?: string,"p_model"?: string,"p_name": string,"p_phase_names": (string)[],"p_purchase_date"?: string,"p_purchase_price_cents"?: number,"p_vin"?: string,"p_year"?: number }; Returns: string
                            },
+"promote_inspiration_to_job":
+{ Args: { "p_description"?: string,"p_inspiration_id": string,"p_links"?: (string)[],"p_overwrite"?: boolean,"p_phase_id"?: string,"p_title": string,"p_type": Database["public"]['Enums']["job_type"] }; Returns: string
+                           },
+"promote_inspiration_to_part":
+{ Args: { "p_inspiration_id": string,"p_name": string,"p_notes"?: string,"p_overwrite"?: boolean,"p_product_url"?: string }; Returns: string
+                           },
 "promote_watch_item":
 { Args: { "p_item_id": string,"p_phase_id"?: string,"p_title"?: string,"p_type": Database["public"]['Enums']["job_type"] }; Returns: string
                            },

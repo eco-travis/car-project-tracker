@@ -184,3 +184,18 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **The quick-add Task dialog** loads its link pickers whenever it's open. In controlled mode its open handler never fired, and the picker stayed on "Loading…".
 - **Deferred to M9:** phase headers now have seven actions (Add job, Add task, Photos, Files, Add expense, Edit, Delete). Fold the secondary ones into a menu during M9's polish pass.
 - **The demo seed adds** 3 watch items (overdue, due, later), a check-in, a suspected part, and 3 tasks (one blocking the lift install).
+
+## M6 — Inspiration (2026-10-11)
+
+**Shipped:** Inspiration board with cards (cover image, source host, tags, notes, links to promoted part and job), tag filter chips, image upload on create and via the card's images dialog, edit and delete (removes stored images), promote to part (Wishlist) or job (Not started, choosing phase and type), "From idea" links on the resulting part and job pages.
+
+**Acceptance:** rule 19 has unit tests (`tests/unit/inspiration.test.ts`) and DB tests for the promote RPCs; flow 4 passes in e2e at both viewports (`tests/e2e/inspiration.spec.ts`), including the overwrite confirmation and the tag filter.
+
+**Decisions**
+
+- **Promote runs in one transaction** (`promote_inspiration_to_part` / `_to_job`). The field mapping is in `lib/domain/inspiration.ts`: part = title, product link, notes; job = title, description from notes, source link in the job's links. The RPC refuses to replace an existing link unless `p_overwrite` is set; the UI shows "Replace the linked part/job?" with "Keep the current link" or "Create new …". The old part or job is never deleted.
+- **A promoted job defaults to Modification**, changeable in the dialog. The spec only fixes the status (Not started).
+- **Tags** are stored lowercased and de-duplicated, from a comma-separated input. Card tags link to the filtered board.
+- **Covers** come from one batch query and one URL-signing call for the whole board (no per-card queries).
+- **Inspiration images stay out of the Gallery** (M4 query); the e2e for flow 4 re-checks it.
+- **The demo seed adds** 3 ideas, one already promoted to the lift spacers part.
