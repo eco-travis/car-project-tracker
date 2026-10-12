@@ -216,3 +216,22 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **Budget bar** (`lib/domain/dashboard.ts`, unit-tested): paid and committed segments against the budget. When over budget the bar scales to total spend and a red segment shows the overage. Its accessible name states the percent of budget used.
 - **"Tasks due this week"** = open tasks due within the next 7 days, overdue ones included (shown in red); same rule as `dueWithin()`.
 - **The parts card links** to `/parts?status=ordered`, and the highlight card to `/gallery?highlights=1`.
+
+## M8 — Exports (2026-10-11)
+
+**Shipped:** the four exports from the plan, generated on demand as authenticated route handlers (RLS applies; 401 without a session), plus an Exports section on the Vehicle page with options and downloads.
+
+**Acceptance:** both criteria pass (`tests/e2e/exports.spec.ts`, against the demo seed).
+
+- Each export downloads and opens: both PDFs are parsed (`unpdf`) and checked for the expected content, ordering, and embedded images; the .xlsx is reopened with `exceljs` (one sheet per table, ids, dollars); the CSV is parsed. The UI downloads all four.
+- `costs=0` removes every dollar amount from both PDFs (asserted: no `$` anywhere in the extracted text).
+
+**Decisions**
+
+- **PDFs** use `@react-pdf/renderer` (already a Next server-external package) with built-in Helvetica/Courier: no font files to ship, nothing fetched at render time. Letter size, a vehicle header (name, VIN, odometer, generated date, applied filters), page numbers.
+- **Images are downloaded server-side as the signed-in user** (`storage.download`, RLS applies) rather than through signed URLs. Only JPEG/PNG embed; anything else (e.g. HEIC) is skipped. Receipt thumbnails use the 480px thumbnail; the build sheet photo is the job's newest highlight, else its newest After photo.
+- **Receipts in the service history** = Receipt attachments on the job or on any expense of the job. Above 200 entries they're omitted automatically and the footer says so (plan rule; unit-tested).
+- **Costs in the PDFs** = committed + paid per job (what the work cost or will cost), with phase subtotals on the build sheet and a total. "Hide all dollar amounts" removes every figure, including totals.
+- **Spreadsheets** drop `owner_id` (always you), rename money columns `*_cents` → `*_usd` with dollar values and a `0.00` number format, and join arrays with "; ". CSV cells starting with `= + - @` are prefixed with `'` so spreadsheets don't execute them.
+- **Download forms are plain GET forms and links**, with no JavaScript needed; the routes answer with `Content-Disposition: attachment`, so the browser stays on the Vehicle page.
+- **The demo seed adds** a done modification job ("Rear recovery points", Armor and recovery) with an installed part and a $320 expense so the build sheet has content. Dashboard expectations updated: build cost $345, total invested $13,889.

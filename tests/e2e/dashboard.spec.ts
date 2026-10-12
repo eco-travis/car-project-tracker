@@ -33,10 +33,11 @@ test.describe("dashboard (M7) with the seed data", () => {
     const card = (name: string) =>
       page.getByRole("region", { name: new RegExp(`^${name}`) });
 
-    // Money: purchase $12,500 + $1,069 paid. Ownership = oil 89 + ATF 42 + coolant pipes 389 + brakes 460.
+    // Money: purchase $12,500 + $1,389 paid. Ownership = oil 89 + ATF 42 + coolant pipes 389 + brakes 460.
+    // Build = phase-only fee 25 + recovery points 320 (via the part's done modification job).
     const money = card("Money");
-    await expect(money).toContainText("Total invested$13,569.00");
-    await expect(money).toContainText("Build cost$25.00");
+    await expect(money).toContainText("Total invested$13,889.00");
+    await expect(money).toContainText("Build cost$345.00");
     await expect(money).toContainText("Ownership cost$980.00");
     await expect(money).toContainText("Tools$64.00");
     await expect(money).toContainText("Recovered$0.00");

@@ -6,6 +6,7 @@ import { AttachmentsPanel } from "@/components/media/attachments-panel";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { VehicleTotals } from "@/components/vehicle-totals";
+import { ExportsPanel } from "@/components/vehicle/exports-panel";
 import { OdometerForm } from "@/components/vehicle/odometer-form";
 import { VehicleForm } from "@/components/vehicle/vehicle-form";
 import { requireVehicle } from "@/lib/auth";
@@ -85,6 +86,15 @@ export default async function VehiclePage() {
           items={media}
           emptyText="No vehicle-level photos or documents yet (title, registration, purchase photos)."
         />
+      </section>
+      <section
+        aria-labelledby="exports-heading"
+        className="rounded-xl border p-4"
+      >
+        <h2 id="exports-heading" className="mb-3 font-semibold">
+          Exports
+        </h2>
+        <ExportsPanel phases={links.phases} />
       </section>
       <section
         aria-labelledby="ledger-heading"

@@ -155,6 +155,17 @@ export async function seedDemo(
       status: "not_started",
     },
     {
+      key: "recovery",
+      title: "Rear recovery points",
+      type: "modification",
+      phase_id: phase("Armor and recovery"),
+      status: "done",
+      completed_on: "2026-09-15",
+      completed_odometer: 140900,
+      performed_by: "diy",
+      diy_hours: 2,
+    },
+    {
       key: "brakes",
       title: "Front brake pads",
       type: "maintenance",
@@ -273,6 +284,16 @@ export async function seedDemo(
       category: "tires_wheels",
       status: "removed",
       notes: "Came off for the KO2s.",
+    },
+    {
+      key: "recovery",
+      job: "recovery",
+      name: "Rear recovery points",
+      brand: "Rennen",
+      category: "recovery",
+      status: "installed",
+      aftermarket_part_number: "RN-955-RRP",
+      vendor: "Rennen",
     },
   ];
   const parts = await must(
@@ -400,6 +421,13 @@ export async function seedDemo(
         category: "shipping_tax_fees",
         vendor: "FCP Euro",
         phase_id: phases.find((p) => p.name === "Baseline maintenance")!.id,
+      }),
+      expense({
+        spent_on: "2026-09-12",
+        amount_cents: 32000,
+        category: "part",
+        vendor: "Rennen",
+        part_id: part("recovery"),
       }),
     ]),
   );

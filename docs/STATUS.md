@@ -2,7 +2,7 @@
 
 What's built versus what's left, against `docs/spec.md` and `docs/plan.md`. **Update this file at the end of every milestone** (see `CLAUDE.md`). Details and rationale live in `DECISIONS.md`.
 
-_Last updated: 2026-10-11, after M7._
+_Last updated: 2026-10-11, after M8._
 
 ## Milestones
 
@@ -16,8 +16,8 @@ _Last updated: 2026-10-11, after M7._
 | M5 Watch list and tasks | ✅ Done | `607f893` |
 | M6 Inspiration | ✅ Done | `3d04945` |
 | M7 Dashboard | ✅ Done | `b172f8a` |
-| M8 Exports | ⏳ Next | |
-| M9 Hardening | ⬜ Not started | |
+| M8 Exports | ✅ Done | see git log (`M8:`) |
+| M9 Hardening | ⏳ Next | |
 
 ## Spec key flows (e2e at phone and desktop)
 
@@ -67,12 +67,12 @@ _Last updated: 2026-10-11, after M7._
 
 ## Exports (M8)
 
-| Export | Status |
-| --- | --- |
-| Service history PDF | ⬜ |
-| Build sheet PDF | ⬜ |
-| Full data .xlsx | ⬜ |
-| Per-table CSV | ⬜ |
+| Export | Status | Route |
+| --- | --- | --- |
+| Service history PDF | ✅ dates, phase, costs, receipt thumbnails | `/api/exports/service-history` |
+| Build sheet PDF | ✅ dates, phase, costs, one photo per job | `/api/exports/build-sheet` |
+| Full data .xlsx | ✅ one sheet per table, money in dollars | `/api/exports/xlsx` |
+| Per-table CSV | ✅ | `/api/exports/csv/<table>` |
 
 ## Deferred / known follow-ups
 
@@ -99,5 +99,5 @@ _Last updated: 2026-10-11, after M7._
 
 ## Test totals (last full run)
 
-- Unit + database (Vitest): 203
-- End-to-end (Playwright, desktop + phone): 73, passing on dev and on a production build
+- Unit + database (Vitest): 210
+- End-to-end (Playwright, desktop + phone): 79, passing on dev and on a production build
