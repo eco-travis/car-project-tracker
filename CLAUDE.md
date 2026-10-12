@@ -4,6 +4,7 @@ Single-user web app for planning, tracking, and documenting a 2004 Cayenne Turbo
 
 - **Spec (behavior, source of truth):** `docs/spec.md`
 - **Technical plan (structure, order, milestones M0–M9):** `docs/plan.md`
+- **What's done vs. outstanding:** `docs/STATUS.md`
 - **Decisions, plan/spec conflicts, milestone notes:** `DECISIONS.md`
 - **Next.js version notes:** @AGENTS.md (this Next.js has breaking changes; read `node_modules/next/dist/docs/` before writing Next code)
 
@@ -20,6 +21,7 @@ Build milestones M0 through M9 in order. A milestone is done only when every acc
 - Every schema change is a new migration file. Never edit a migration that has already been applied.
 - Never commit secrets. Read configuration only from environment variables listed in the plan's Human setup.
 - Commit at least once per milestone with a message starting `M<n>:`.
+- At the end of every milestone, update `docs/STATUS.md` (milestones, flows, rules, screens, deferred items, test totals) in the same commit.
 - Production migrations (`supabase db push`) run only after the human approves in chat.
 - Deployment is deferred (see `DECISIONS.md`): the definition-of-done smoke check runs against `npm run preview` with local Supabase instead of Vercel.
 
