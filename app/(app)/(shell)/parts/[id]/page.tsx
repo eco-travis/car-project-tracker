@@ -8,6 +8,8 @@ import { ExpenseList } from "@/components/expenses/expense-list";
 import { AttachmentsPanel } from "@/components/media/attachments-panel";
 import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { Money } from "@/components/money";
+import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
+import { TaskList } from "@/components/tasks/task-list";
 import { PartFormDialog } from "@/components/parts/part-form-dialog";
 import { PartStatusControl } from "@/components/parts/part-status-control";
 import { RecordSaleDialog } from "@/components/parts/record-sale-dialog";
@@ -15,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { deletePart } from "@/lib/actions/parts";
 import { getAttachmentsFor } from "@/lib/db/queries/media";
 import { getLinkOptions } from "@/lib/db/queries/options";
+import { getTaskLinkOptions, getTasksFor } from "@/lib/db/queries/tasks";
 import { getPart } from "@/lib/db/queries/parts";
 import { todayIso } from "@/lib/domain/dates";
 import { formatDate } from "@/lib/format";
@@ -35,6 +38,10 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
     getPart(id),
     getLinkOptions(),
     getAttachmentsFor({ kind: "part", id }),
+  ]);
+  const [tasks, taskOptions] = await Promise.all([
+    getTasksFor("part", id),
+    getTaskLinkOptions(),
   ]);
   if (!data) notFound();
   const { part } = data;
@@ -196,6 +203,32 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
         <AttachmentsPanel
           parent={{ kind: "part", id: part.id }}
           items={media}
+        />
+      </section>
+      <section
+        aria-labelledby="part-tasks-heading"
+        className="rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="part-tasks-heading" className="font-semibold">
+            Tasks
+          </h2>
+          <TaskFormDialog
+            preset={{ kind: "part", id: part.id }}
+            options={taskOptions}
+            trigger={
+              <Button variant="outline" size="sm">
+                Add task
+              </Button>
+            }
+          />
+        </div>
+        <TaskList
+          tasks={tasks}
+          today={todayIso()}
+          options={taskOptions}
+          hideLinksTo={`/parts/${part.id}`}
+          emptyText="No tasks linked."
         />
       </section>
       <section aria-labelledby="part-money" className="rounded-xl border p-4">

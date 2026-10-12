@@ -11,6 +11,8 @@ import { CostSummary } from "@/components/cost-summary";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { JobPartsPanel } from "@/components/jobs/job-parts-panel";
+import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
+import { TaskList } from "@/components/tasks/task-list";
 import { AttachmentsPanel } from "@/components/media/attachments-panel";
 import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { JobToolsPanel } from "@/components/jobs/job-tools-panel";
@@ -20,6 +22,8 @@ import { requireVehicle } from "@/lib/auth";
 import { getJob } from "@/lib/db/queries/jobs";
 import { getAttachmentsFor } from "@/lib/db/queries/media";
 import { getLinkOptions } from "@/lib/db/queries/options";
+import { getTaskLinkOptions, getTasksFor } from "@/lib/db/queries/tasks";
+import { getPromotedFrom } from "@/lib/db/queries/watch";
 import { getPhaseOptions } from "@/lib/db/queries/plan";
 import { formatHours } from "@/lib/domain/costs";
 import { todayIso } from "@/lib/domain/dates";
@@ -46,6 +50,11 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
     getLinkOptions(),
     getAttachmentsFor({ kind: "job", id }),
   ]);
+  const [tasks, taskOptions, promotedFrom] = await Promise.all([
+    getTasksFor("job", id),
+    getTaskLinkOptions(),
+    getPromotedFrom(id),
+  ]);
   if (!data) notFound();
   const { job } = data;
   const today = todayIso();
@@ -64,6 +73,14 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
           <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
           <p className="text-muted-foreground text-sm">
             {JOB_TYPE_LABELS[job.type]}
+            {promotedFrom && (
+              <>
+                {" · From watch item "}
+                <Link href={`/watch/${promotedFrom.id}`} className="underline">
+                  {promotedFrom.title}
+                </Link>
+              </>
+            )}
           </p>
         </div>
         <div className="flex gap-1">
@@ -189,6 +206,32 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
         />
       </section>
 
+      <section
+        aria-labelledby="job-tasks-heading"
+        className="rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="job-tasks-heading" className="font-semibold">
+            Tasks
+          </h2>
+          <TaskFormDialog
+            preset={{ kind: "job", id: job.id }}
+            options={taskOptions}
+            trigger={
+              <Button variant="outline" size="sm">
+                Add task
+              </Button>
+            }
+          />
+        </div>
+        <TaskList
+          tasks={tasks}
+          today={todayIso()}
+          options={taskOptions}
+          hideLinksTo={`/jobs/${job.id}`}
+          emptyText="No tasks. Add one, and toggle “Blocks this job” if it must be done first."
+        />
+      </section>
       <section aria-labelledby="deps-heading" className="rounded-xl border p-4">
         <h2 id="deps-heading" className="mb-3 font-semibold">
           Dependencies

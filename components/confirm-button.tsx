@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useState, useTransition, type ReactNode } from "react";
 import {
   AlertDialog,
@@ -38,7 +39,9 @@ export function ConfirmButton({
         setError(null);
       }}
     >
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
+        <ClientTrigger>{trigger}</ClientTrigger>
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

@@ -21,6 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { CostSummary } from "@/components/cost-summary";
+import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
 import { AttachmentsDialog } from "@/components/media/attachments-dialog";
 import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
@@ -273,6 +274,18 @@ function SortablePhase({
                 </Button>
               }
             />
+            <TaskFormDialog
+              preset={{ kind: "phase", id: phase.id }}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Add task to ${phase.name}`}
+                >
+                  Add task
+                </Button>
+              }
+            />
             <ViewPhotosButton
               scope={{ kind: "phase", id: phase.id }}
               label="Photos"
@@ -341,11 +354,18 @@ function whatsMissing(jobs: PlanJob[]): string[] {
   );
   const tools = new Set(open.flatMap((j) => j.toolsToBuy.map((t) => t.id)));
   const blocked = open.filter((j) => visibleBlockers(j).length > 0).length;
+  const blockingTasks = new Set(
+    open.flatMap((j) =>
+      j.blockers.filter((b) => b.kind === "task").map((b) => b.id),
+    ),
+  );
   const plural = (n: number, one: string, many: string) =>
     n === 1 ? `1 ${one}` : `${n} ${many}`;
   return [
     parts.size && `${plural(parts.size, "part", "parts")} not ordered`,
     tools.size && `${plural(tools.size, "tool", "tools")} to buy`,
+    blockingTasks.size &&
+      `${plural(blockingTasks.size, "blocking task", "blocking tasks")} open`,
     blocked && `${plural(blocked, "job is", "jobs are")} blocked`,
   ].filter(Boolean) as string[];
 }

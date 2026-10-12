@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,7 +79,11 @@ export function RecordSaleDialog({
         }
       }}
     >
-      {available && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {available && (
+        <DialogTrigger asChild>
+          <ClientTrigger>{trigger}</ClientTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent>
         {openTasks ? (
           <>

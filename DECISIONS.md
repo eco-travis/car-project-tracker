@@ -156,3 +156,31 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **The carousel's slides are memoized.** The lightbox resets to its starting index whenever `slides` changes identity, which had made Next and swipe snap back to the first slide.
 - **The e2e console guard** now also fails tests on React duplicate-key errors (it caught one on the Gallery page).
 - **Not in M4:** media on watch items, check-ins, tasks, and inspiration comes with M5 and M6. The attachments panel and parent plumbing already support them.
+
+## M5 — Watch list and tasks (2026-10-11)
+
+**Shipped:** watch items (create and edit with relative or absolute follow-ups; optional first check-in with clip; delete), check-ins with odometer and media, promote to a job, resolve, dismiss, reopen, and suspected parts; the Watch list (overdue first) and watch item page; tasks with multi-record links and the "blocks this job" toggle; the Tasks screen; the task checklist on job detail; "Add task" on job, part, phase, and watch item; quick-add menu (Photo / Watch item / Task); the "From watch item" link on promoted jobs; open blocking tasks in the phase "Missing" line (flow 5 now complete).
+
+**Acceptance:** all three criteria pass.
+
+- Rules 15–18 and 20 are pure functions in `lib/domain/watch.ts` and `lib/domain/tasks.ts` with unit tests.
+- `v_watch_due`, the check-in odometer trigger, `promote_watch_item`, and the task-link RPCs have DB tests; the due view is compared to `watchDue()` across every boundary case.
+- A task with `blocks_job` stops its job from reaching Ready until it's completed (e2e and DB).
+- Flows 7, 8, and 9 pass at both viewports, on dev and on a production build.
+
+**Decisions**
+
+- **Quick-add is now a menu** (Photo / Watch item / Task) because flows 7 and 9 also start from quick-add. Photo opens the picker straight away, so flow 1 is still two taps after choosing the file.
+- **Overdue** = more than 7 days past the follow-up date or more than 500 miles past the follow-up reading (spec decision). "Today" is Pacific, in the view and in the domain function.
+- **Relative follow-ups** ("in 3 months", "in 3,000 miles") are converted on save; an exact date or reading wins if both are filled in. Months clamp to the end of shorter months.
+- **The first check-in on create** uses today and the current odometer, and is created only when there's an observation; a clip needs one.
+- **Rule 14 extends to check-ins** with the same trigger pattern as done jobs.
+- **Promote** only allows Diagnosis (default) or Repair, enforced in the RPC too. It defaults the job title to the watch item's title, carries over suspected parts that have no job, and doesn't set `closed_on` (rule 18 is for resolve and dismiss). The app then opens the new job.
+- **Reopen** undoes resolve or dismiss (not in the spec, but cheap insurance against a mis-tap).
+- **Task links** are written by `create_task_with_links` / `set_task_links` (replace-all, one transaction). Dropped tasks keep `completed_on` null.
+- **Task checkboxes are optimistic** (`useOptimistic`): they tick immediately and the refresh confirms.
+- **`ClientTrigger`** wraps every dialog trigger. Triggers created in Server Components could reach Radix's Slot as unresolved lazy references while their chunk loaded under load, crashing with "failed to slot onto its children". The wrapper always hands Radix a valid element and resolves the child itself. 122 of 122 repeated e2e runs passed afterwards.
+- **The e2e fixture now fails on any uncaught browser error**, in addition to hydration and duplicate-key errors.
+- **The quick-add Task dialog** loads its link pickers whenever it's open. In controlled mode its open handler never fired, and the picker stayed on "Loading…".
+- **Deferred to M9:** phase headers now have seven actions (Add job, Add task, Photos, Files, Add expense, Edit, Delete). Fold the secondary ones into a menu during M9's polish pass.
+- **The demo seed adds** 3 watch items (overdue, due, later), a check-in, a suspected part, and 3 tasks (one blocking the lift install).

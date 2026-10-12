@@ -88,3 +88,27 @@ export const EXPENSE_STATE_LABELS = {
   committed: "Committed",
   paid: "Paid",
 } as const;
+
+export const WATCH_SYSTEM_LABELS = {
+  engine: "Engine",
+  drivetrain: "Drivetrain",
+  suspension: "Suspension",
+  steering: "Steering",
+  brakes: "Brakes",
+  electrical: "Electrical",
+  body: "Body",
+  other: "Other",
+} as const;
+
+export const WATCH_SEVERITY_LABELS = {
+  monitor: "Monitor",
+  concerning: "Concerning",
+  act_soon: "Act soon",
+} as const;
+
+export const WATCH_STATUS_LABELS = {
+  watching: "Watching",
+  promoted: "Promoted",
+  resolved: "Resolved",
+  dismissed: "Dismissed",
+} as const;

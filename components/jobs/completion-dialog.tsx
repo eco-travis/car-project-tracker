@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useState, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -107,7 +108,11 @@ export function CompletionDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && (
+        <DialogTrigger asChild>
+          <ClientTrigger>{trigger}</ClientTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent>
         {followUp ? (
           <>

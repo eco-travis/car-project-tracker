@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,7 +69,9 @@ export function PhaseFormDialog({
         if (next) reset(defaults);
       }}
     >
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>
+        <ClientTrigger>{trigger}</ClientTrigger>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{phase ? "Edit phase" : "Add phase"}</DialogTitle>

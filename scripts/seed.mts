@@ -396,6 +396,106 @@ await must(
   ]),
 );
 
+// Watch items: one due by mileage, one due by date with a check-in, one later.
+const watchRows = [
+  {
+    title: "Power steering pump moan on cold start",
+    system: "steering",
+    severity: "concerning",
+    next_followup_on: "2026-10-01",
+    next_followup_odometer: null,
+    description: "About 10 seconds below 40°F, then quiet.",
+  },
+  {
+    title: "Clunk over speed bumps (front left)",
+    system: "suspension",
+    severity: "act_soon",
+    next_followup_on: null,
+    next_followup_odometer: 141000,
+    description: null,
+  },
+  {
+    title: "Small seep at oil pan gasket",
+    system: "engine",
+    severity: "monitor",
+    next_followup_on: "2027-01-15",
+    next_followup_odometer: 144000,
+    description: null,
+  },
+];
+const watch = await must(
+  admin
+    .from("watch_items")
+    .insert(watchRows.map((w) => ({ ...w, owner_id, vehicle_id })) as never)
+    .select("id, title"),
+);
+const watchId = (prefix: string) =>
+  watch.find((w) => w.title.startsWith(prefix))!.id;
+await must(
+  admin.from("watch_checkins").insert({
+    owner_id,
+    watch_item_id: watchId("Power steering"),
+    checked_on: "2026-09-10",
+    odometer: 140700,
+    observation: "Moan for ~10s at 38°F. Fluid level OK.",
+  }),
+);
+const sway = await must(
+  admin
+    .from("parts")
+    .insert({
+      owner_id,
+      vehicle_id,
+      name: "Front sway bar end link",
+      category: "suspension",
+      status: "idea",
+      superseded_numbers: [],
+      quantity: 1,
+    })
+    .select("id")
+    .single(),
+);
+await must(
+  admin
+    .from("watch_item_parts")
+    .insert({ owner_id, watch_item_id: watchId("Clunk"), part_id: sway.id }),
+);
+
+// Tasks: one blocks the lift install, one is linked to the stock wheels, one undated.
+const task = async (
+  title: string,
+  due_on: string | null,
+  links: Record<string, unknown>[],
+) => {
+  const t = await must(
+    admin
+      .from("tasks")
+      .insert({ owner_id, vehicle_id, title, due_on })
+      .select("id")
+      .single(),
+  );
+  if (links.length)
+    await must(
+      admin.from("task_links").insert(
+        links.map((l) => ({
+          owner_id,
+          task_id: t.id,
+          blocks_job: false,
+          ...l,
+        })) as never,
+      ),
+    );
+};
+await task("Book bay at DIY garage for lift install", "2026-10-15", [
+  { job_id: job("lift"), blocks_job: true },
+]);
+await task("Sell stock wheels to clear storage", "2026-10-25", [
+  { part_id: part("wheels") },
+]);
+await task("Ask forum about 957 sway links on 955", null, [
+  { watch_item_id: watchId("Clunk") },
+]);
+
 // The trigger only fires on writes, so set the odometer explicitly after inserting history.
 await must(
   admin
@@ -406,5 +506,5 @@ await must(
 );
 
 console.log(
-  `Seeded ${phases.length} phases, ${jobs.length} jobs, ${parts.length} parts, and ${tools.length} tools for ${email}.`,
+  `Seeded ${phases.length} phases, ${jobs.length} jobs, ${parts.length} parts, ${tools.length} tools, ${watch.length} watch items, and 3 tasks for ${email}.`,
 );

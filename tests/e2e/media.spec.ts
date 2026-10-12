@@ -20,8 +20,9 @@ test.describe("spec flow 1: quick add from phone", () => {
     await user.signIn(page);
     await page.goto("/plan");
 
-    const chooser = page.waitForEvent("filechooser");
     await page.getByRole("button", { name: "Quick add" }).click();
+    const chooser = page.waitForEvent("filechooser");
+    await page.getByRole("menuitem", { name: "Photo" }).click();
     await (await chooser).setFiles(exifPhoto("2026:03:14 10:30:00"));
 
     const sheet = page.getByRole("dialog", { name: "Quick add" });
@@ -74,11 +75,12 @@ test.describe("spec flow 1: quick add from phone", () => {
     await seedJob(user, vehicle, { title: "Oil change" });
     await user.signIn(page);
     await page.goto("/dashboard");
-    const chooser = page.waitForEvent("filechooser");
     await page
       .locator("aside")
       .getByRole("button", { name: "Quick add" })
       .click();
+    const chooser = page.waitForEvent("filechooser");
+    await page.getByRole("menuitem", { name: "Photo" }).click();
     await (await chooser).setFiles(exifPhoto("2026:05:02 08:00:00"));
     await page
       .getByRole("dialog", { name: "Quick add" })

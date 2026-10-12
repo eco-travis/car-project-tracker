@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
@@ -102,7 +103,9 @@ export function PartFormDialog({
         if (next) reset(defaults);
       }}
     >
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>
+        <ClientTrigger>{trigger}</ClientTrigger>
+      </DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{part ? "Edit part" : "Add part"}</DialogTitle>

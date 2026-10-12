@@ -4,8 +4,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Camera, Plus } from "lucide-react";
+import { Camera, Eye, ListChecks, Plus } from "lucide-react";
+import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { WatchItemFormDialog } from "@/components/watch/watch-item-form-dialog";
 import {
   Sheet,
   SheetContent,
@@ -21,8 +29,9 @@ import { cn } from "@/lib/utils";
 const NO_JOB = "vehicle";
 
 /**
- * Flow 1: one button opens the camera/library; then pick a job (most recent first, preselected)
- * and optionally add a note. Save is one tap, or two if you pick another job.
+ * One button opens: Photo, Watch item, or Task (flows 1, 7, 9).
+ * Photo: pick a file, then a job (most recent first, preselected) and an optional note.
+ * Save is one tap, or two if you pick another job.
  */
 export function QuickAdd({
   jobs,
@@ -42,6 +51,7 @@ export function QuickAdd({
   const [saved, setSaved] = useState<{ href: string; label: string } | null>(
     null,
   );
+  const [form, setForm] = useState<"watch" | "task" | null>(null);
 
   function pick() {
     setSaved(null);
@@ -96,23 +106,53 @@ export function QuickAdd({
           if (f) setJobId(jobs[0]?.id ?? NO_JOB);
         }}
       />
-      {variant === "fab" ? (
-        <Button
-          onClick={pick}
-          size="icon-lg"
-          className="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-lg md:hidden"
-          aria-label="Quick add"
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          {variant === "fab" ? (
+            <Button
+              size="icon-lg"
+              className="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-lg md:hidden"
+              aria-label="Quick add"
+            >
+              <Plus className="size-6" aria-hidden />
+            </Button>
+          ) : (
+            <Button className="w-full justify-start" aria-label="Quick add">
+              <Plus aria-hidden /> Quick add
+            </Button>
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align={variant === "fab" ? "end" : "start"}
+          side={variant === "fab" ? "top" : "bottom"}
+          className="w-48"
         >
-          <Camera className="size-6" aria-hidden />
-        </Button>
-      ) : (
-        <Button
-          onClick={pick}
-          className="w-full justify-start"
-          aria-label="Quick add"
-        >
-          <Plus aria-hidden /> Quick add
-        </Button>
+          <DropdownMenuItem onSelect={pick}>
+            <Camera aria-hidden /> Photo
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setForm("watch")}>
+            <Eye aria-hidden /> Watch item
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setForm("task")}>
+            <ListChecks aria-hidden /> Task
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {form === "watch" && (
+        <WatchItemFormDialog
+          open
+          onOpenChange={(o) => !o && setForm(null)}
+          onCreated={(id) =>
+            setSaved({ href: `/watch/${id}`, label: "the Watch list" })
+          }
+        />
+      )}
+      {form === "task" && (
+        <TaskFormDialog
+          open
+          onOpenChange={(o) => !o && setForm(null)}
+          onSaved={() => setSaved({ href: "/tasks", label: "Tasks" })}
+        />
       )}
       {saved && (
         <p

@@ -141,6 +141,12 @@ isOneToOne: false
       foreignKeyName: "attachments_watch_item_id_fkey"
       columns: ["watch_item_id"]
 isOneToOne: false
+      referencedRelation: "v_watch_due"
+      referencedColumns: ["watch_item_id"]
+    },{
+      foreignKeyName: "attachments_watch_item_id_fkey"
+      columns: ["watch_item_id"]
+isOneToOne: false
       referencedRelation: "watch_items"
       referencedColumns: ["id"]
     }
@@ -601,6 +607,12 @@ isOneToOne: false
       foreignKeyName: "task_links_watch_item_id_fkey"
       columns: ["watch_item_id"]
 isOneToOne: false
+      referencedRelation: "v_watch_due"
+      referencedColumns: ["watch_item_id"]
+    },{
+      foreignKeyName: "task_links_watch_item_id_fkey"
+      columns: ["watch_item_id"]
+isOneToOne: false
       referencedRelation: "watch_items"
       referencedColumns: ["id"]
     }
@@ -687,6 +699,12 @@ isOneToOne: false
       foreignKeyName: "watch_checkins_watch_item_id_fkey"
       columns: ["watch_item_id"]
 isOneToOne: false
+      referencedRelation: "v_watch_due"
+      referencedColumns: ["watch_item_id"]
+    },{
+      foreignKeyName: "watch_checkins_watch_item_id_fkey"
+      columns: ["watch_item_id"]
+isOneToOne: false
       referencedRelation: "watch_items"
       referencedColumns: ["id"]
     }
@@ -715,6 +733,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "v_part_costs"
       referencedColumns: ["part_id"]
+    },{
+      foreignKeyName: "watch_item_parts_watch_item_id_fkey"
+      columns: ["watch_item_id"]
+isOneToOne: false
+      referencedRelation: "v_watch_due"
+      referencedColumns: ["watch_item_id"]
     },{
       foreignKeyName: "watch_item_parts_watch_item_id_fkey"
       columns: ["watch_item_id"]
@@ -888,6 +912,12 @@ isOneToOne: false
       foreignKeyName: "attachments_watch_item_id_fkey"
       columns: ["watch_item_id"]
 isOneToOne: false
+      referencedRelation: "v_watch_due"
+      referencedColumns: ["watch_item_id"]
+    },{
+      foreignKeyName: "attachments_watch_item_id_fkey"
+      columns: ["watch_item_id"]
+isOneToOne: false
       referencedRelation: "watch_items"
       referencedColumns: ["id"]
     }
@@ -1028,17 +1058,46 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"v_watch_due": {
+                  Row: {
+                    "is_due": boolean | null,"is_overdue": boolean | null,"last_checkin_on": string | null,"vehicle_id": string | null,"watch_item_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "watch_items_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "v_vehicle_totals"
+      referencedColumns: ["vehicle_id"]
+    },{
+      foreignKeyName: "watch_items_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Functions: {
-            "create_vehicle_with_phases":
+            "create_task_with_links":
+{ Args: { "p_due_on"?: string,"p_links": Json,"p_notes"?: string,"p_title": string }; Returns: string
+                           },
+"create_vehicle_with_phases":
 { Args: { "p_current_odometer"?: number,"p_generation"?: string,"p_model"?: string,"p_name": string,"p_phase_names": (string)[],"p_purchase_date"?: string,"p_purchase_price_cents"?: number,"p_vin"?: string,"p_year"?: number }; Returns: string
+                           },
+"promote_watch_item":
+{ Args: { "p_item_id": string,"p_phase_id"?: string,"p_title"?: string,"p_type": Database["public"]['Enums']["job_type"] }; Returns: string
                            },
 "record_part_sale":
 { Args: { "p_notes"?: string,"p_part_id": string,"p_price_cents": number,"p_spent_on": string,"p_vendor"?: string }; Returns: string
                            },
 "reorder_phases":
 { Args: { "p_phase_ids": (string)[] }; Returns: undefined
+                           },
+"set_task_links":
+{ Args: { "p_links": Json,"p_task_id": string }; Returns: undefined
                            }
           }
           Enums: {

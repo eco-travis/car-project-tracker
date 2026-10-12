@@ -92,10 +92,13 @@ export const test = base.extend<{ user: E2EUser }>({
       )
         reactErrors.push(m.text().slice(0, 300));
     });
+    page.on("pageerror", (e) =>
+      reactErrors.push(`Uncaught: ${e.message}`.slice(0, 300)),
+    );
     await provide(page);
     expect(
       reactErrors,
-      "React hydration or key errors in the browser console",
+      "Uncaught errors, hydration mismatches, or duplicate keys in the browser",
     ).toEqual([]);
   },
   // A fresh, isolated user per test; deleted afterwards (rows cascade).

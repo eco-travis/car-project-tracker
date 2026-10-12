@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientTrigger } from "@/components/client-trigger";
 import { useState, useTransition, type ReactNode } from "react";
 import {
   Dialog,
@@ -42,7 +43,9 @@ export function AttachmentsDialog({
 
   return (
     <Dialog onOpenChange={(open) => (open ? load() : setItems(null))}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>
+        <ClientTrigger>{trigger}</ClientTrigger>
+      </DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
