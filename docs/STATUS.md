@@ -14,7 +14,7 @@ _Last updated: 2026-10-11, after M6._
 | M3 Parts, tools, money | ✅ Done | `15b97a5` |
 | M4 Media, quick-add, Gallery | ✅ Done | `48415f3` |
 | M5 Watch list and tasks | ✅ Done | `607f893` |
-| M6 Inspiration | ✅ Done | see git log (`M6:`) |
+| M6 Inspiration | ✅ Done | `3d04945` |
 | M7 Dashboard | ⏳ Next | |
 | M8 Exports | ⬜ Not started | |
 | M9 Hardening | ⬜ Not started | |
