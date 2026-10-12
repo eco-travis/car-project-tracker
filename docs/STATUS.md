@@ -16,7 +16,7 @@ _Last updated: 2026-10-11, after M8._
 | M5 Watch list and tasks | ✅ Done | `607f893` |
 | M6 Inspiration | ✅ Done | `3d04945` |
 | M7 Dashboard | ✅ Done | `b172f8a` |
-| M8 Exports | ✅ Done | see git log (`M8:`) |
+| M8 Exports | ✅ Done | `07ed01a` |
 | M9 Hardening | ⏳ Next | |
 
 ## Spec key flows (e2e at phone and desktop)
