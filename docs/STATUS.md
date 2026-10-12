@@ -15,7 +15,7 @@ _Last updated: 2026-10-11, after M7._
 | M4 Media, quick-add, Gallery | ✅ Done | `48415f3` |
 | M5 Watch list and tasks | ✅ Done | `607f893` |
 | M6 Inspiration | ✅ Done | `3d04945` |
-| M7 Dashboard | ✅ Done | see git log (`M7:`) |
+| M7 Dashboard | ✅ Done | `b172f8a` |
 | M8 Exports | ⏳ Next | |
 | M9 Hardening | ⬜ Not started | |
 
