@@ -18,7 +18,14 @@ const { data } = await admin.auth.admin.listUsers({ perPage: 1000 });
 const user = data.users.find(
   (u) => u.email?.toLowerCase() === email.toLowerCase(),
 );
-if (!user) throw new Error(`No user ${email} yet. Run npm run db:seed first.`);
-const { error } = await admin.auth.admin.updateUserById(user.id, { password });
+// Create the user if this is a fresh database (no seed yet): onboarding starts from there.
+let userId = user?.id;
+if (!userId) {
+  const { data: created, error: createError } =
+    await admin.auth.admin.createUser({ email, email_confirm: true });
+  if (createError) throw createError;
+  userId = created.user.id;
+}
+const { error } = await admin.auth.admin.updateUserById(userId, { password });
 if (error) throw error;
 console.log(`Dev password set for ${email}.`);

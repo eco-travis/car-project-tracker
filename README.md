@@ -31,6 +31,16 @@ npm run dev                            # http://localhost:3000
 | `NEXT_PUBLIC_MAX_UPLOAD_MB`             | Optional per-file upload cap; default 500                                                                                                      |
 | `DEV_AUTO_LOGIN` / `DEV_LOGIN_PASSWORD` | Optional, local only: set `DEV_AUTO_LOGIN=1` and any random password to skip the magic link under `npm run dev`. Ignored by production builds. |
 
+### Testing on your phone (same Wi-Fi)
+
+```bash
+npm run dev:lan          # prints http://<your-mac-ip>:3000 — open it on the phone and the Mac
+```
+
+It points the app at local Supabase through your Mac's Wi-Fi address (so uploads and photos work from the phone), allows that address as a Next.js dev origin, and keeps auto sign-in working. Stop `npm run dev` first (both use port 3000). If macOS asks to allow incoming connections for `node`, allow it. The full hands-on checklist is in `docs/MANUAL-TEST.md`.
+
+Want to enter your real car instead of the demo build? `npm run db:fresh` gives you an empty database with just your user, and onboarding starts from there.
+
 Without auto sign-in, request a magic link at `/login` and open it from the local mail catcher at http://127.0.0.1:54324. Supabase Studio is at http://127.0.0.1:54323.
 
 ## Everyday commands
@@ -46,6 +56,8 @@ npm run test:e2e         # Playwright, desktop 1280x800 + phone 390x844; can run
 npm run test:e2e:preview # the same suite against a production build
 npm run db:reset         # reset local database, re-seed demo data
 npm run db:seed          # demo data only (replaces ALLOWED_EMAIL's vehicle)
+npm run db:fresh         # empty database + your user (onboarding), for entering your real car
+npm run dev:lan          # dev server reachable from your phone on the same Wi-Fi
 npm run db:types         # regenerate lib/db/types.ts after a migration
 ```
 

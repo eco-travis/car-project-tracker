@@ -255,3 +255,15 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **Page-ready marker:** screens render inside the new loading (Suspense) boundary, so the root hydration flag can fire before the screen is interactive (it showed up as "141000140000" in an odometer test on the production build). `PageReady` sits in `PageHeader` and the detail pages, and the e2e fixture waits for it on app screens.
 - **Radix dialogs stay mounted:** opening a dialog from a menu and unmounting it the moment it closed left Radix focus guards in `<body>`; on phones the next menu then closed itself immediately. The phase menu, quick-add, Mark done, and task edit now keep their dialogs mounted (`open={…}`) with a key per opening for fresh state. Found through a flaky production e2e and confirmed with a focus-event trace.
 - **The phase menu doesn't flip** (`avoidCollisions={false}`), so it can't oscillate near the viewport edge.
+
+## Local phone testing before deploy (2026-10-13)
+
+Travis asked to test everything locally, including on his phone, before deploying.
+
+- **`npm run dev:lan`** (`scripts/dev-lan.mts`) finds the Mac's private Wi-Fi IP, sets `NEXT_PUBLIC_SUPABASE_URL=http://<ip>:54321` for that session (127.0.0.1 on a phone is the phone, so uploads and signed image URLs would fail), sets `LAN_HOST` for `allowedDevOrigins`, and binds `next dev` to that IP. Binding to `0.0.0.0` made redirects point at `0.0.0.0`, which a phone can't open.
+- **Dev auto sign-in** also accepts a Supabase URL on a private LAN address (10/8, 172.16/12, 192.168/16). It's still dev-only (`NODE_ENV=development`) and unit-tested against public and lookalike hosts.
+- **Local Supabase redirect URLs** allow private LAN hosts on :3000, so magic links work from the phone too. This is local `config.toml` only, not production.
+- **`npm run db:fresh`** gives an empty database with just the owner user (onboarding), for entering the real car. `db:dev-password` now creates the user if needed.
+- **`docs/MANUAL-TEST.md`**: a hands-on checklist for phone and desktop, reused after deploy.
+- **Verified** with a scripted phone-sized browser using only the LAN address: auto sign-in, all 10 screens, quick-add upload, Gallery image served from Supabase on the LAN IP, PDF export.
+- A file input opens the iPhone camera over plain http on the LAN; only in-page camera APIs (not used) need HTTPS.

@@ -20,7 +20,9 @@
     "preview": "next build && next start --port 3000",
     "test:e2e:preview": "E2E_PREVIEW=1 playwright test",
     "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed.mts",
-    "db:dev-password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev-password.mts"
+    "db:dev-password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev-password.mts",
+    "dev:lan": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev-lan.mts",
+    "db:fresh": "supabase db reset && npm run db:dev-password"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",

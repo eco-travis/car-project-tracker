@@ -34,10 +34,29 @@ describe("devAutoLoginEnabled", () => {
       "a lookalike host",
       { NEXT_PUBLIC_SUPABASE_URL: "http://localhost.evil.io" },
     ],
+    ["a public IP", { NEXT_PUBLIC_SUPABASE_URL: "http://8.8.8.8:54321" }],
+    [
+      "a non-private 172 range",
+      { NEXT_PUBLIC_SUPABASE_URL: "http://172.32.0.1:54321" },
+    ],
   ])("is off with %s", (_label, overrides) => {
     withEnv(overrides);
     expect(devAutoLoginEnabled()).toBe(false);
   });
+});
+
+describe("devAutoLoginEnabled on the LAN", () => {
+  it.each([
+    "http://192.168.1.20:54321",
+    "http://10.0.0.5:54321",
+    "http://172.16.233.163:54321",
+  ])(
+    "allows Supabase on a private LAN address (%s) for phone testing",
+    (url) => {
+      withEnv({ NEXT_PUBLIC_SUPABASE_URL: url });
+      expect(devAutoLoginEnabled()).toBe(true);
+    },
+  );
 });
 
 describe("safeNextPath", () => {

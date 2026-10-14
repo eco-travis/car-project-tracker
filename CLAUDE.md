@@ -36,6 +36,7 @@ Build milestones M0 through M9 in order. A milestone is done only when every acc
 
 ```
 npm run dev         # Next.js dev server
+npm run dev:lan     # dev server reachable from a phone on the same Wi-Fi (see docs/MANUAL-TEST.md)
 npm run preview     # production build + next start (stand-in for deploy smoke check)
 npm run typecheck   # next typegen && tsc --noEmit
 npm run lint
