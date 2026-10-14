@@ -17,7 +17,7 @@ _Last updated: 2026-10-13, after M9. All build milestones are done; deployment i
 | M6 Inspiration | ✅ Done | `3d04945` |
 | M7 Dashboard | ✅ Done | `b172f8a` |
 | M8 Exports | ✅ Done | `07ed01a` |
-| M9 Hardening | ✅ Done | see git log (`M9:`) |
+| M9 Hardening | ✅ Done | `69417d1` |
 
 ## Spec key flows (e2e at phone and desktop)
 
