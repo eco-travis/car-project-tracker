@@ -2,7 +2,7 @@
 
 What's built versus what's left, against `docs/spec.md` and `docs/plan.md`. **Update this file at the end of every milestone** (see `CLAUDE.md`). Details and rationale live in `DECISIONS.md`.
 
-_Last updated: 2026-10-11, after M8._
+_Last updated: 2026-10-13, after M9. All build milestones are done; deployment is next._
 
 ## Milestones
 
@@ -17,7 +17,7 @@ _Last updated: 2026-10-11, after M8._
 | M6 Inspiration | ✅ Done | `3d04945` |
 | M7 Dashboard | ✅ Done | `b172f8a` |
 | M8 Exports | ✅ Done | `07ed01a` |
-| M9 Hardening | ⏳ Next | |
+| M9 Hardening | ✅ Done | see git log (`M9:`) |
 
 ## Spec key flows (e2e at phone and desktop)
 
@@ -53,7 +53,7 @@ _Last updated: 2026-10-11, after M8._
 | Screen | Status | Notes |
 | --- | --- | --- |
 | Dashboard | ✅ | All cards per spec; e2e asserts values with the demo seed |
-| Plan | ✅ | Phase headers need a tidier action menu (M9) |
+| Plan | ✅ | Secondary phase actions in a More menu |
 | Job detail | ✅ | |
 | Work Log | ✅ | |
 | Gallery | ✅ | |
@@ -77,13 +77,20 @@ _Last updated: 2026-10-11, after M8._
 ## Deferred / known follow-ups
 
 - Confirm the dashboard loads in under 1 s on the warm Vercel deployment (local production build: ~60 ms warm).
-
-- Phase header has seven actions; fold secondary ones into a menu (M9).
-- Empty, loading, and error states for every screen (M9).
-- PWA manifest and icons (M9).
-- Lighthouse accessibility ≥ 90 on dashboard, plan, gallery (M9).
-- `README.md` with setup, deploy, and backup instructions (M9).
+- Real-device check on iOS Safari after deploy: camera capture (needs HTTPS), HEIC uploads, home-screen install.
 - `npm audit` advisories in the dev-only lint chain (revisit when `eslint-config-next` updates).
+- Post-MVP items from the spec (multi-vehicle, reminders, offline, receipt OCR, etc.) are out of scope.
+
+## Quality bar (M9)
+
+| Check | Result |
+| --- | --- |
+| All 11 spec flows, phone + desktop, dev + production build | ✅ 105 e2e tests; 210/210 on two repeated production runs |
+| Lighthouse accessibility (dashboard, plan, gallery) | ✅ 100 / 100 / 100 (target ≥ 90); best practices 96 |
+| axe (WCAG 2.1 AA), every screen with demo data | ✅ no serious or critical violations (`tests/e2e/a11y.spec.ts`) |
+| Installable (manifest, icons, iOS home screen) | ✅ no offline mode (post-MVP) |
+| Empty, loading, error, not-found states | ✅ |
+| README (setup, deploy, backups) | ✅ |
 
 ## Outstanding human setup (needed to deploy)
 
@@ -100,4 +107,4 @@ _Last updated: 2026-10-11, after M8._
 ## Test totals (last full run)
 
 - Unit + database (Vitest): 210
-- End-to-end (Playwright, desktop + phone): 79, passing on dev and on a production build
+- End-to-end (Playwright, desktop + phone): 105, passing on dev and on a production build

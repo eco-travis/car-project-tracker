@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export function SeverityBadge({ severity }: { severity: WatchSeverity }) {
   const tone = {
-    monitor: "bg-muted text-muted-foreground",
+    monitor: "bg-muted text-neutral-700 dark:text-neutral-300",
     concerning:
       "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
     act_soon: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
@@ -24,7 +24,7 @@ export function DueBadge({ due, overdue }: { due: boolean; overdue: boolean }) {
       variant="secondary"
       className={cn(
         "border-transparent",
-        overdue ? "bg-red-600 text-white" : "bg-amber-500 text-white",
+        overdue ? "bg-red-700 text-white" : "bg-amber-700 text-white",
       )}
     >
       {overdue ? "Overdue" : "Due"}

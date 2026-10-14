@@ -16,9 +16,12 @@ export const metadata: Metadata = {
     template: "%s · Cayenne Tracker",
   },
   description: "Plan, track, and document the Cayenne build.",
+  applicationName: "Cayenne Project Tracker",
+  appleWebApp: { capable: true, title: "Cayenne", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
+  themeColor: "#111111",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

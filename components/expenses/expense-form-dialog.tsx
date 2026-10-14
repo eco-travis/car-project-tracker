@@ -50,7 +50,9 @@ type Props = {
   preset?: Partial<ExpenseFormValues>;
   options: LinkOptions;
   today: string;
-  trigger: ReactNode;
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   title?: string;
 };
 
@@ -64,8 +66,12 @@ export function ExpenseFormDialog({
   today,
   trigger,
   title,
+  open: controlledOpen,
+  onOpenChange,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const defaults: ExpenseFormValues = expense
     ? {
         spent_on: expense.spent_on,
@@ -115,9 +121,11 @@ export function ExpenseFormDialog({
         if (next) reset(defaults);
       }}
     >
-      <DialogTrigger asChild>
-        <ClientTrigger>{trigger}</ClientTrigger>
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          <ClientTrigger>{trigger}</ClientTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>

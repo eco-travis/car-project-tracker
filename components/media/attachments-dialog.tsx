@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientTrigger } from "@/components/client-trigger";
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,13 +23,18 @@ export function AttachmentsDialog({
   receipt,
   uploadLabel,
   trigger,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   parent: Exclude<Parent, null>;
   title: string;
   description?: string;
   receipt?: boolean;
   uploadLabel?: string;
-  trigger: ReactNode;
+  trigger?: ReactNode;
+  /** Controlled mode (e.g. opened from a menu); mount it only while open. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [items, setItems] = useState<MediaItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +46,26 @@ export function AttachmentsDialog({
       else setError(result.error);
     });
 
+  // Controlled opens don't call onOpenChange(true); load whenever it becomes open.
+  useEffect(() => {
+    if (controlledOpen) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload per opening only
+  }, [controlledOpen]);
+
   return (
-    <Dialog onOpenChange={(open) => (open ? load() : setItems(null))}>
-      <DialogTrigger asChild>
-        <ClientTrigger>{trigger}</ClientTrigger>
-      </DialogTrigger>
+    <Dialog
+      open={controlledOpen}
+      onOpenChange={(open) => {
+        onOpenChange?.(open);
+        if (open) load();
+        else setItems(null);
+      }}
+    >
+      {trigger && (
+        <DialogTrigger asChild>
+          <ClientTrigger>{trigger}</ClientTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

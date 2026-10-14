@@ -31,11 +31,18 @@ import type { PlanPhase } from "@/lib/db/queries/plan";
 export function PhaseFormDialog({
   phase,
   trigger,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   phase?: PlanPhase;
-  trigger: ReactNode;
+  trigger?: ReactNode;
+  /** Controlled mode (e.g. opened from a menu); mount it only while open. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const defaults: PhaseFormValues = {
     name: phase?.name ?? "",
     description: phase?.description ?? "",
@@ -69,9 +76,11 @@ export function PhaseFormDialog({
         if (next) reset(defaults);
       }}
     >
-      <DialogTrigger asChild>
-        <ClientTrigger>{trigger}</ClientTrigger>
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          <ClientTrigger>{trigger}</ClientTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{phase ? "Edit phase" : "Add phase"}</DialogTitle>

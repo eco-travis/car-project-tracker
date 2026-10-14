@@ -20,20 +20,33 @@ export function DeletePhaseButton({
   id,
   name,
   jobCount,
+  open,
+  onOpenChange,
 }: {
   id: string;
   name: string;
   jobCount: number;
+  /** Controlled mode (opened from the phase menu): no trigger button is rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   return (
-    <AlertDialog onOpenChange={() => setError(null)}>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        setError(null);
+        onOpenChange?.(next);
+      }}
+    >
+      {open === undefined && (
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            Delete
+          </Button>
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete phase</AlertDialogTitle>

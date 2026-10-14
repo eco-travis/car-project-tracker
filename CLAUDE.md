@@ -48,6 +48,7 @@ npm run db:reset    # supabase db reset, then db:seed
 npm run db:seed     # demo data owned by ALLOWED_EMAIL (local only)
 npm run db:dev-password  # local password for DEV_AUTO_LOGIN (skips the magic link in `npm run dev`)
 npm run db:types    # regenerate lib/db/types.ts
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/make-icons.mts  # re-render app icons
 ```
 
 ## Environment

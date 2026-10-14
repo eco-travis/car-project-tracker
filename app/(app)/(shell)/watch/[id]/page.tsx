@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageReady } from "@/components/page-ready";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
@@ -63,6 +64,7 @@ export default async function WatchItemPage({
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
+        <PageReady />
         <div className="min-w-0">
           <p className="text-muted-foreground text-sm">
             <Link href="/watch" className="hover:underline">

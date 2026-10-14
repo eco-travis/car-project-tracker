@@ -103,7 +103,10 @@ test.describe("spec flow 5: plan a phase (jobs and blockers)", () => {
     await page.goto("/plan");
 
     const phase = page.getByRole("region", { name: /Armor and recovery/ });
-    await phase.getByRole("button", { name: "Delete" }).click();
+    await phase
+      .getByRole("button", { name: "More actions for Armor and recovery" })
+      .click();
+    await page.getByRole("menuitem", { name: "Delete phase" }).click();
     const confirm = page.getByRole("alertdialog");
     await expect(confirm).toContainText(
       'Delete "Armor and recovery"? Its 2 jobs will stay in the plan as unphased.',
@@ -160,4 +163,50 @@ test.describe("spec flow 5: plan a phase (jobs and blockers)", () => {
     await page.reload();
     await expect(phases.first()).toContainText("Suspension and tires");
   });
+});
+
+test("phase menu opens add task, add expense, files, and edit", async ({
+  page,
+  user,
+}) => {
+  await user.createVehicle("Phase menu");
+  await user.signIn(page);
+  await page.goto("/plan");
+  const phase = page.getByRole("region", { name: /Electrical and lighting/ });
+  const open = async (item: string) => {
+    // A closing dialog keeps pointer-events off <body> until its exit animation ends.
+    await expect(page.locator("body")).not.toHaveCSS("pointer-events", "none");
+    await phase
+      .getByRole("button", { name: "More actions for Electrical and lighting" })
+      .click();
+    await page.getByRole("menuitem", { name: item }).click();
+  };
+
+  await open("Edit phase");
+  const edit = page.getByRole("dialog", { name: "Edit phase" });
+  await edit.getByLabel("Budget ($)").fill("2,500");
+  await edit.getByRole("button", { name: "Save phase" }).click();
+  await expect(edit).toBeHidden();
+  await expect(phase).toContainText("Budget$2,500.00");
+
+  await open("Add expense");
+  const expense = page.getByRole("dialog", {
+    name: "Add expense to Electrical and lighting",
+  });
+  await expense.getByLabel("Amount ($)").fill("40");
+  await expense.getByLabel("Category").selectOption("other");
+  await expense.getByRole("button", { name: "Add expense" }).click();
+  await expect(expense).toBeHidden();
+  await expect(phase).toContainText("Paid$40.00");
+
+  await open("Add task");
+  const task = page.getByRole("dialog", { name: "Add task" });
+  await expect(task).toContainText("Phase: Electrical and lighting");
+  await page.keyboard.press("Escape");
+  await expect(task).toBeHidden();
+
+  await open("Files");
+  await expect(
+    page.getByRole("dialog", { name: "Files for Electrical and lighting" }),
+  ).toContainText("No photos or files yet.");
 });

@@ -12,7 +12,7 @@ export function ToolStatusBadge({ status }: { status: ToolStatus }) {
         "border-transparent",
         status === "need_to_buy"
           ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-          : "bg-muted text-muted-foreground",
+          : "bg-muted text-neutral-700 dark:text-neutral-300",
       )}
     >
       {TOOL_STATUS_LABELS[status]}

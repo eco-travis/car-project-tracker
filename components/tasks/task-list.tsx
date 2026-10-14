@@ -35,7 +35,16 @@ export function TaskList({
   label?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<TaskRow | null>(null);
+  const [editing, setEditingState] = useState<TaskRow | null>(null);
+  const [lastEdited, setLastEdited] = useState<TaskRow | null>(null);
+  const [editCount, setEditCount] = useState(0);
+  const setEditing = (t: TaskRow | null) => {
+    setEditingState(t);
+    if (t) {
+      setLastEdited(t);
+      setEditCount((c) => c + 1);
+    }
+  };
   const [, startTransition] = useTransition();
   // Tick immediately; the server refresh confirms it (or the change reverts on failure).
   const [shown, setShown] = useOptimistic(
@@ -167,11 +176,13 @@ export function TaskList({
           );
         })}
       </ul>
-      {editing && (
+      {/* Stays mounted after closing so Radix can clean up (see PhaseActionsMenu). */}
+      {lastEdited && (
         <TaskFormDialog
-          task={editing}
+          key={lastEdited.id + editCount}
+          task={lastEdited}
           options={options}
-          open
+          open={editing !== null}
           onOpenChange={(o) => !o && setEditing(null)}
         />
       )}

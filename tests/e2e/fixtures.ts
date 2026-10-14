@@ -69,8 +69,19 @@ export async function createE2EUser(
 export const test = base.extend<{ user: E2EUser }>({
   // Full page loads wait for React to hydrate, so tests never type into a not-yet-live form.
   page: async ({ page }, provide) => {
-    const waitForHydration = () =>
-      page.waitForSelector("html[data-hydrated]", { state: "attached" });
+    // App screens render inside a loading (Suspense) boundary: also wait for the screen itself.
+    const waitForHydration = async () => {
+      await page.waitForSelector("html[data-hydrated]", { state: "attached" });
+      if (
+        !/^\/(login|auth|onboarding|api)(\/|$)/.test(
+          new URL(page.url()).pathname,
+        )
+      ) {
+        await page.waitForSelector("html[data-page-ready]", {
+          state: "attached",
+        });
+      }
+    };
     const goto = page.goto.bind(page);
     const reload = page.reload.bind(page);
     page.goto = async (...args) => {

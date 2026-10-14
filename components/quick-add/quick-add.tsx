@@ -51,7 +51,13 @@ export function QuickAdd({
   const [saved, setSaved] = useState<{ href: string; label: string } | null>(
     null,
   );
-  const [form, setForm] = useState<"watch" | "task" | null>(null);
+  // Dialogs stay mounted (see PhaseActionsMenu): unmounting mid-close leaves Radix focus guards behind.
+  const [{ form, n }, setFormState] = useState<{
+    form: "watch" | "task" | null;
+    n: number;
+  }>({ form: null, n: 0 });
+  const setForm = (f: "watch" | "task" | null) =>
+    setFormState((s) => (f ? { form: f, n: s.n + 1 } : { ...s, form: null }));
 
   function pick() {
     setSaved(null);
@@ -138,22 +144,20 @@ export function QuickAdd({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {form === "watch" && (
-        <WatchItemFormDialog
-          open
-          onOpenChange={(o) => !o && setForm(null)}
-          onCreated={(id) =>
-            setSaved({ href: `/watch/${id}`, label: "the Watch list" })
-          }
-        />
-      )}
-      {form === "task" && (
-        <TaskFormDialog
-          open
-          onOpenChange={(o) => !o && setForm(null)}
-          onSaved={() => setSaved({ href: "/tasks", label: "Tasks" })}
-        />
-      )}
+      <WatchItemFormDialog
+        key={`watch-${n}`}
+        open={form === "watch"}
+        onOpenChange={(o) => !o && setForm(null)}
+        onCreated={(id) =>
+          setSaved({ href: `/watch/${id}`, label: "the Watch list" })
+        }
+      />
+      <TaskFormDialog
+        key={`task-${n}`}
+        open={form === "task"}
+        onOpenChange={(o) => !o && setForm(null)}
+        onSaved={() => setSaved({ href: "/tasks", label: "Tasks" })}
+      />
       {saved && (
         <p
           role="status"

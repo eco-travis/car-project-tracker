@@ -21,10 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { CostSummary } from "@/components/cost-summary";
-import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
-import { AttachmentsDialog } from "@/components/media/attachments-dialog";
 import { ViewPhotosButton } from "@/components/media/view-photos-button";
-import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { reorderPhases } from "@/lib/actions/phases";
@@ -34,10 +31,9 @@ import { formatHours } from "@/lib/domain/costs";
 import { reorderIds } from "@/lib/domain/phases";
 import { formatDate } from "@/lib/format";
 import { PHASE_STATUS_LABELS } from "@/lib/labels";
-import { DeletePhaseButton } from "./delete-phase-button";
 import { JobFormDialog } from "./job-form-dialog";
 import { JobRow, visibleBlockers } from "./job-row";
-import { PhaseFormDialog } from "./phase-form-dialog";
+import { PhaseActionsMenu } from "./phase-actions-menu";
 
 type PhaseOption = { id: string; name: string };
 
@@ -124,6 +120,11 @@ export function PlanBoard({
         accessibility={{ announcements, screenReaderInstructions }}
       >
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          {order.length === 0 && (
+            <p className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+              No phases. Add one to group jobs and track a budget.
+            </p>
+          )}
           <ol className="flex flex-col gap-4" aria-label="Phases">
             {order.map((id, index) => {
               const phase = byId.get(id);
@@ -274,68 +275,11 @@ function SortablePhase({
                 </Button>
               }
             />
-            <TaskFormDialog
-              preset={{ kind: "phase", id: phase.id }}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`Add task to ${phase.name}`}
-                >
-                  Add task
-                </Button>
-              }
-            />
             <ViewPhotosButton
               scope={{ kind: "phase", id: phase.id }}
               label="Photos"
             />
-            <AttachmentsDialog
-              parent={{ kind: "phase", id: phase.id }}
-              title={`Files for ${phase.name}`}
-              description="Phase-level photos and documents. Job photos live on each job."
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`Add files to ${phase.name}`}
-                >
-                  Files
-                </Button>
-              }
-            />
-            <ExpenseFormDialog
-              options={links}
-              today={today}
-              title={`Add expense to ${phase.name}`}
-              preset={{ phase_id: phase.id }}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`Add expense to ${phase.name}`}
-                >
-                  Add expense
-                </Button>
-              }
-            />
-            <PhaseFormDialog
-              phase={phase}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`Edit ${phase.name}`}
-                >
-                  Edit
-                </Button>
-              }
-            />
-            <DeletePhaseButton
-              id={phase.id}
-              name={phase.name}
-              jobCount={phase.jobs.length}
-            />
+            <PhaseActionsMenu phase={phase} links={links} today={today} />
           </div>
         </header>
         <JobList jobs={phase.jobs} />

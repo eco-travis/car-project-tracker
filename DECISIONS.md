@@ -235,3 +235,23 @@ Travis asked to skip the magic link during local testing. `npm run dev` now sign
 - **Spreadsheets** drop `owner_id` (always you), rename money columns `*_cents` → `*_usd` with dollar values and a `0.00` number format, and join arrays with "; ". CSV cells starting with `= + - @` are prefixed with `'` so spreadsheets don't execute them.
 - **Download forms are plain GET forms and links**, with no JavaScript needed; the routes answer with `Content-Disposition: attachment`, so the browser stays on the Vehicle page.
 - **The demo seed adds** a done modification job ("Rear recovery points", Armor and recovery) with an installed part and a $320 expense so the build sheet has content. Dashboard expectations updated: build cost $345, total invested $13,889.
+
+## M9 — Hardening (2026-10-13)
+
+**Shipped:** installable web app (manifest, icons, iOS home-screen metadata; no service worker); loading skeleton, screen-level error boundary with retry, not-found pages, and a global error page; "Skip to content" link; empty states (including a Plan with no phases); the phase "More" menu (Add task, Add expense, Files, Edit, Delete), with Add job and Photos still visible; color-contrast fixes; axe accessibility tests; `README.md`.
+
+**Acceptance:** all three criteria pass.
+
+- All 11 spec flows pass at phone and desktop (105 e2e tests on dev and on a production build; 210/210 over two repeated production runs).
+- Lighthouse accessibility is 100 on dashboard, plan, and gallery (production build, signed in); best practices 96.
+- `README.md` covers local setup, deploy, and downloading a full backup via the .xlsx export.
+
+**Decisions and fixes**
+
+- **Error boundaries use `retry`**: Next 16.4 passes `retry`, not `reset` (checked the bundled docs).
+- **Icons** are drawn as SVG in `scripts/make-icons.mts` and rendered with Playwright's Chromium (no image tooling dependency). They replace the scaffold's Next.js favicon. The manifest is served without auth (browsers fetch it without cookies); `start_url` is `/dashboard`.
+- **Contrast:** gray-on-gray badges (`text-muted-foreground` on `bg-muted`) were just under 4.5:1. Badge text is now `neutral-700`, and Due/Overdue use amber-700/red-700 with white.
+- **axe in e2e** (`@axe-core/playwright`, WCAG 2.1 A/AA) scans every screen with demo data and fails on serious or critical violations, so regressions surface in the normal test run. It also covers the carousel and the skip link.
+- **Page-ready marker:** screens render inside the new loading (Suspense) boundary, so the root hydration flag can fire before the screen is interactive (it showed up as "141000140000" in an odometer test on the production build). `PageReady` sits in `PageHeader` and the detail pages, and the e2e fixture waits for it on app screens.
+- **Radix dialogs stay mounted:** opening a dialog from a menu and unmounting it the moment it closed left Radix focus guards in `<body>`; on phones the next menu then closed itself immediately. The phase menu, quick-add, Mark done, and task edit now keep their dialogs mounted (`open={…}`) with a key per opening for fresh state. Found through a flaky production e2e and confirmed with a focus-event trace.
+- **The phase menu doesn't flip** (`avoidCollisions={false}`), so it can't oscillate near the viewport edge.

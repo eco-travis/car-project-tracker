@@ -23,13 +23,17 @@ export function StatusControl({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [doneOpen, setDoneOpen] = useState(false);
+  const [doneKey, setDoneKey] = useState(0);
 
   function change(status: JobStatus) {
     setError(null);
     // Rule 2 feedback without a round trip; the server action re-checks.
     const blocked = statusChangeError(status, openBlockers);
     if (blocked) return setError(blocked);
-    if (status === "done") return setDoneOpen(true);
+    if (status === "done") {
+      setDoneKey((k) => k + 1);
+      return setDoneOpen(true);
+    }
     startTransition(async () => {
       const result = await setJobStatus(job.id, { status });
       if (!result.ok) setError(result.error);
@@ -73,15 +77,15 @@ export function StatusControl({
           {error}
         </p>
       )}
-      {/* Mounted per opening so the form starts from fresh defaults. */}
-      {doneOpen && (
-        <CompletionDialog
-          job={job}
-          defaults={completionDefaults}
-          open
-          onOpenChange={setDoneOpen}
-        />
-      )}
+      {/* Always mounted so Radix can finish closing (see PhaseActionsMenu); a new key per
+          opening starts the form from fresh defaults. */}
+      <CompletionDialog
+        key={doneKey}
+        job={job}
+        defaults={completionDefaults}
+        open={doneOpen}
+        onOpenChange={setDoneOpen}
+      />
     </div>
   );
 }

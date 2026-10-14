@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageReady } from "@/components/page-ready";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Plus } from "lucide-react";
@@ -65,6 +66,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
+        <PageReady />
         <div className="min-w-0">
           <p className="text-muted-foreground text-sm">
             <Link href="/plan" className="hover:underline">
