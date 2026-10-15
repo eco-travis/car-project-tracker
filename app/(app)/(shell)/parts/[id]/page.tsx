@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { PageReady } from "@/components/page-ready";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { z } from "zod";
-import { ConfirmButton } from "@/components/confirm-button";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { AttachmentsPanel } from "@/components/media/attachments-panel";
@@ -11,11 +10,11 @@ import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { Money } from "@/components/money";
 import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
 import { TaskList } from "@/components/tasks/task-list";
+import { DeletePartButton } from "@/components/parts/delete-part-button";
 import { PartFormDialog } from "@/components/parts/part-form-dialog";
 import { PartStatusControl } from "@/components/parts/part-status-control";
 import { RecordSaleDialog } from "@/components/parts/record-sale-dialog";
 import { Button } from "@/components/ui/button";
-import { deletePart } from "@/lib/actions/parts";
 import { getAttachmentsFor } from "@/lib/db/queries/media";
 import { getInspirationSources } from "@/lib/db/queries/inspiration";
 import { getLinkOptions } from "@/lib/db/queries/options";
@@ -50,13 +49,6 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
   const { part } = data;
   const today = todayIso();
   const title = part.brand ? `${part.brand} ${part.name}` : part.name;
-
-  async function remove() {
-    "use server";
-    const result = await deletePart(id);
-    if (result.ok) redirect("/parts");
-    return result;
-  }
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -95,12 +87,11 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
             parts={links.parts}
             trigger={<Button variant="outline">Edit</Button>}
           />
-          <ConfirmButton
-            title="Delete part"
-            description={`Delete "${title}"? Its expenses stay in the ledger, unlinked.`}
-            confirmLabel="Delete part"
-            onConfirm={remove}
-            trigger={<Button variant="ghost">Delete</Button>}
+          <DeletePartButton
+            id={part.id}
+            title={title}
+            variant="text"
+            redirectTo="/parts"
           />
         </div>
       </header>

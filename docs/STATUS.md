@@ -59,7 +59,7 @@ _Last updated: 2026-10-13, after M9. All build milestones are done; deployment i
 | Gallery | ✅ | |
 | Watch list (+ item page) | ✅ | |
 | Tasks | ✅ | |
-| Parts (+ part page) | ✅ | |
+| Parts (+ part page) | ✅ | Delete from the list or the part page |
 | Tools | ✅ | |
 | Inspiration | ✅ | Cards, tag filter, images, promote to part or job |
 | Vehicle | ✅ | Money summary, ledger, notes, odometer, files |
@@ -107,4 +107,4 @@ _Last updated: 2026-10-13, after M9. All build milestones are done; deployment i
 ## Test totals (last full run)
 
 - Unit + database (Vitest): 210
-- End-to-end (Playwright, desktop + phone): 105, passing on dev and on a production build
+- End-to-end (Playwright, desktop + phone): 109, passing on dev and on a production build

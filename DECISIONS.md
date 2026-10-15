@@ -267,3 +267,11 @@ Travis asked to test everything locally, including on his phone, before deployin
 - **`docs/MANUAL-TEST.md`**: a hands-on checklist for phone and desktop, reused after deploy.
 - **Verified** with a scripted phone-sized browser using only the LAN address: auto sign-in, all 10 screens, quick-add upload, Gallery image served from Supabase on the LAN IP, PDF export.
 - A file input opens the iPhone camera over plain http on the LAN; only in-page camera APIs (not used) need HTTPS.
+
+## Delete parts from the Parts list (2026-10-14)
+
+Travis asked to delete parts straight from the main list.
+
+- **Each Parts row has a trash button** (`DeletePartButton`, shared with the part page's Delete). Both use the same confirmation, which states the effects: linked expenses stay in the ledger unlinked (money history is kept); the part's photos and files are deleted; links from tasks, watch items, and replaced parts are removed. Deleting from the part page returns to the list.
+- **Fix:** deleting a part cascaded its attachment rows but left their files in Storage. `deletePart` now removes the stored files first, as attachment and inspiration deletes already did.
+- **Tests:** `tests/e2e/delete-part.spec.ts` covers cancel, confirm, the expense kept with `part_id = null`, Storage emptied, and the task kept without its link.

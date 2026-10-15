@@ -83,6 +83,21 @@ export async function deletePart(id: unknown): Promise<ActionResult> {
   const partId = z.uuid().safeParse(id);
   if (!partId.success) return fail("Part not found.");
   const supabase = await createClient();
+  // Attachment rows cascade with the part; their stored files must be removed here.
+  const { data: files } = await supabase
+    .from("attachments")
+    .select("storage_path, thumb_path")
+    .eq("part_id", partId.data);
+  const paths = (files ?? []).flatMap((f) => [
+    f.storage_path,
+    ...(f.thumb_path ? [f.thumb_path] : []),
+  ]);
+  if (paths.length) {
+    const { error: storageError } = await supabase.storage
+      .from("attachments")
+      .remove(paths);
+    if (storageError) return fail("Couldn't delete the part's files.");
+  }
   const { data, error } = await supabase
     .from("parts")
     .delete()

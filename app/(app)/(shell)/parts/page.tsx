@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { z } from "zod";
 import { controlClass } from "@/components/form/field";
 import { Money } from "@/components/money";
+import { DeletePartButton } from "@/components/parts/delete-part-button";
 import { PartFormDialog } from "@/components/parts/part-form-dialog";
 import { PartStatusBadge } from "@/components/parts/part-status-badge";
 import { PageHeader } from "@/components/shell/page-header";
@@ -156,6 +157,9 @@ export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
                 >
                   Job
                 </th>
+                <th scope="col" className="w-10 px-3 py-2">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -202,6 +206,12 @@ export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
                         {p.job.title}
                       </Link>
                     )}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <DeletePartButton
+                      id={p.id}
+                      title={p.brand ? `${p.brand} ${p.name}` : p.name}
+                    />
                   </td>
                 </tr>
               ))}
