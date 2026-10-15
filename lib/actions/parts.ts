@@ -5,7 +5,11 @@ import { requireVehicle } from "@/lib/auth";
 import { createClient } from "@/lib/db/server";
 import { todayIso } from "@/lib/domain/dates";
 import { recordSaleError, saleExpense } from "@/lib/domain/parts";
-import { partSchema, partStatusSchema } from "@/lib/schemas/part";
+import {
+  newPartSchema,
+  partSchema,
+  partStatusSchema,
+} from "@/lib/schemas/part";
 import { saleSchema } from "@/lib/schemas/expense";
 import { linksBelongToVehicle } from "./ownership";
 import { refreshApp } from "./refresh";
@@ -17,7 +21,7 @@ export async function createPart(
   input: unknown,
 ): Promise<ActionResult<{ id: string }>> {
   const vehicle = await requireVehicle();
-  const parsed = partSchema.safeParse(input);
+  const parsed = newPartSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
   const supabase = await createClient();
   const badLink = await linksBelongToVehicle(supabase, vehicle.id, {
@@ -31,12 +35,30 @@ export async function createPart(
       ],
     });
 
+  const { cost_cents, ...fields } = parsed.data;
   const { data, error } = await supabase
     .from("parts")
-    .insert({ ...parsed.data, vehicle_id: vehicle.id })
+    .insert({ ...fields, vehicle_id: vehicle.id })
     .select("id")
     .single();
   if (error) return fail("Couldn't create the part.");
+  if (cost_cents !== null) {
+    // The ledger is where money lives (the part's cost is the sum of its expenses). Its insert
+    // trigger moves a planning-stage part to Ordered, as adding an expense does anywhere.
+    const { error: expenseError } = await supabase.from("expenses").insert({
+      vehicle_id: vehicle.id,
+      part_id: data.id,
+      spent_on: todayIso(),
+      amount_cents: cost_cents,
+      category: "part",
+      state: "paid",
+      vendor: fields.vendor,
+    });
+    if (expenseError) {
+      await supabase.from("parts").delete().eq("id", data.id);
+      return fail("Couldn't save the cost, so the part wasn't added.");
+    }
+  }
   refreshApp();
   return ok({ id: data.id });
 }

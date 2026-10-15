@@ -7,7 +7,6 @@ const tinyPdf = Buffer.from(
 );
 const REMOVED = [
   "Brand",
-  "Vendor",
   "Fitment notes",
   "Superseded numbers",
   "Aftermarket part number",
@@ -172,4 +171,70 @@ test("part page uploads a receipt or invoice", async ({ page, user }) => {
       .getByRole("region", { name: "Photos and files" })
       .getByRole("button", { name: /^Receipt,/ }),
   ).toBeVisible();
+});
+
+test("Add part with a cost records a paid expense linked to the part", async ({
+  page,
+  user,
+}) => {
+  await user.createVehicle("Part cost");
+  await user.signIn(page);
+  await page.goto("/parts");
+  await page.getByRole("button", { name: "Add part" }).click();
+  const dialog = page.getByRole("dialog", { name: "Add part" });
+  await dialog.getByLabel("Name", { exact: true }).fill("Skid plate");
+  await dialog.getByLabel("Cost (optional)").fill("abc");
+  await dialog.getByRole("button", { name: "Add part" }).click();
+  await expect(
+    dialog.getByText("Cost must be a dollar amount like 1,234.56."),
+  ).toBeVisible();
+  await dialog.getByLabel("Cost (optional)").fill("1,249.99");
+  await dialog.getByLabel("Vendor", { exact: true }).fill("Rennline");
+  await dialog.getByRole("button", { name: "Add part" }).click();
+
+  await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);
+  const partId = page.url().split("/").pop()!;
+  await expect(page.getByRole("region", { name: "Expenses" })).toContainText(
+    "$1,249.99",
+  );
+  const admin = adminClient();
+  const { data: expense } = await admin
+    .from("expenses")
+    .select("amount_cents, category, state, vendor")
+    .eq("part_id", partId)
+    .single();
+  expect(expense).toEqual({
+    amount_cents: 124999,
+    category: "part",
+    state: "paid",
+    vendor: "Rennline",
+  });
+  const { data: part } = await admin
+    .from("parts")
+    .select("status")
+    .eq("id", partId)
+    .single();
+  expect(part!.status).toBe("ordered"); // rule: an expense on a planning-stage part marks it Ordered
+});
+
+test("Add part without a cost creates no expense", async ({ page, user }) => {
+  await user.createVehicle("Part no cost");
+  await user.signIn(page);
+  await page.goto("/parts");
+  await page.getByRole("button", { name: "Add part" }).click();
+  const dialog = page.getByRole("dialog", { name: "Add part" });
+  await dialog.getByLabel("Name", { exact: true }).fill("Recovery boards");
+  await dialog.getByRole("button", { name: "Add part" }).click();
+  await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);
+  const { count } = await adminClient()
+    .from("expenses")
+    .select("*", { count: "exact", head: true })
+    .eq("owner_id", user.id);
+  expect(count).toBe(0);
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "Edit part" })
+      .getByLabel("Cost (optional)"),
+  ).toHaveCount(0);
 });

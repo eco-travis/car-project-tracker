@@ -134,7 +134,7 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
           <Detail label="OEM part number" mono>
             {part.oem_part_number ?? "—"}
           </Detail>
-          {part.vendor && <Detail label="Vendor">{part.vendor}</Detail>}
+          <Detail label="Vendor">{part.vendor ?? "—"}</Detail>
           {part.fitment_notes && (
             <Detail label="Fitment notes">{part.fitment_notes}</Detail>
           )}

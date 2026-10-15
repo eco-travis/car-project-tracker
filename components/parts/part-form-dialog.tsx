@@ -29,7 +29,7 @@ import {
   options,
 } from "@/lib/labels";
 import {
-  partSchema,
+  newPartSchema,
   type PartFormValues,
   type PartInput,
 } from "@/lib/schemas/part";
@@ -41,7 +41,7 @@ type Part = Database["public"]["Tables"]["parts"]["Row"];
 const RECEIPT_TYPES = "image/*,application/pdf";
 
 /**
- * Add part: name, category, status, quantity, OEM number, web link, notes, and an optional
+ * Add part: name, category, status, quantity, OEM number, web link, vendor, notes, and an optional
  * receipt or invoice.
  * Edit part: the same essentials, with the rest of the spec's part fields under "More details"
  * (kept so existing data stays editable). A job is still linked when adding from a job's page.
@@ -84,17 +84,17 @@ export function PartFormDialog({
     warranty_notes: part?.warranty_notes ?? "",
     quantity: String(part?.quantity ?? 1),
     notes: part?.notes ?? "",
+    cost_cents: "",
   };
   const { register, handleSubmit, getValues, setError, reset, formState } =
     useForm<PartFormValues, unknown, PartInput>({
-      resolver: zodResolver(partSchema),
+      resolver: zodResolver(newPartSchema),
       defaultValues: defaults,
     });
   const { errors, isSubmitting } = formState;
   const moreDetailsError = (
     [
       "brand",
-      "vendor",
       "fitment_notes",
       "superseded_numbers",
       "aftermarket_part_number",
@@ -189,6 +189,17 @@ export function PartFormDialog({
             error={errors.quantity?.message}
             {...register("quantity")}
           />
+          {!part && (
+            <TextField
+              id="part-cost"
+              label="Cost (optional)"
+              inputMode="decimal"
+              placeholder="0.00"
+              hint="Adds a paid expense dated today."
+              error={errors.cost_cents?.message}
+              {...register("cost_cents")}
+            />
+          )}
           <TextField
             id="part-oem"
             label="OEM part number"
@@ -202,6 +213,12 @@ export function PartFormDialog({
             placeholder="https://"
             error={errors.product_url?.message}
             {...register("product_url")}
+          />
+          <TextField
+            id="part-vendor"
+            label="Vendor"
+            error={errors.vendor?.message}
+            {...register("vendor")}
           />
           <TextareaField
             id="part-notes"
@@ -277,12 +294,6 @@ export function PartFormDialog({
                   label="Brand"
                   error={errors.brand?.message}
                   {...register("brand")}
-                />
-                <TextField
-                  id="part-vendor"
-                  label="Vendor"
-                  error={errors.vendor?.message}
-                  {...register("vendor")}
                 />
                 <TextareaField
                   id="part-fitment"

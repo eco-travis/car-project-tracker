@@ -3,6 +3,7 @@ import {
   optionalDate,
   optionalId,
   optionalInt,
+  optionalMoney,
   optionalText,
   optionalUrl,
   textList,
@@ -51,8 +52,13 @@ export const partSchema = z.object({
   notes: optionalText,
 });
 
-export type PartFormValues = z.input<typeof partSchema>;
-export type PartInput = z.output<typeof partSchema>;
+/** Add part can also record what it cost: a paid "part" expense dated today, linked to it. */
+export const newPartSchema = partSchema.extend({
+  cost_cents: optionalMoney("Cost"),
+});
+
+export type PartFormValues = z.input<typeof newPartSchema>;
+export type PartInput = z.output<typeof newPartSchema>;
 
 /** Rule 8: any status can be set by hand. */
 export const partStatusSchema = z.object({ status: z.enum(PART_STATUSES) });

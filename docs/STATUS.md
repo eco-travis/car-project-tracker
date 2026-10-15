@@ -107,4 +107,4 @@ _Last updated: 2026-10-13, after M9. All build milestones are done; deployment i
 ## Test totals (last full run)
 
 - Unit + database (Vitest): 210
-- End-to-end (Playwright, desktop + phone): 117, passing on dev and on a production build
+- End-to-end (Playwright, desktop + phone): 121, passing on dev and on a production build
