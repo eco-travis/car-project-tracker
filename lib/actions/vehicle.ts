@@ -55,7 +55,7 @@ export async function updateVehicle(input: unknown): Promise<ActionResult> {
   return ok();
 }
 
-/** Rule 14: a manual update may set any value at or above the current reading. */
+/** Manual update: any whole number of miles, so a wrong reading can be corrected. */
 export async function updateOdometer(
   input: unknown,
 ): Promise<ActionResult<{ current_odometer: number }>> {
@@ -63,7 +63,7 @@ export async function updateOdometer(
   const parsed = odometerSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
   const next = parsed.data.current_odometer!;
-  const error = manualOdometerError(vehicle.current_odometer, next);
+  const error = manualOdometerError(next);
   if (error) return fail(error, { current_odometer: [error] });
 
   const supabase = await createClient();

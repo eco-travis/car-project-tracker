@@ -18,20 +18,15 @@ describe("odometerAfterReading (rule 14)", () => {
   });
 });
 
-describe("manualOdometerError (rule 14)", () => {
-  it("accepts the current value or higher", () => {
-    expect(manualOdometerError(141000, 141000)).toBeNull();
-    expect(manualOdometerError(141000, 141500)).toBeNull();
-  });
-
-  it("rejects a lower value", () => {
-    expect(manualOdometerError(141000, 140999)).toBe(
-      "The odometer can't go down. It's at 141,000 miles.",
-    );
+describe("manualOdometerError", () => {
+  it("accepts any whole number, lower than before included (corrections)", () => {
+    expect(manualOdometerError(141500)).toBeNull();
+    expect(manualOdometerError(140999)).toBeNull();
+    expect(manualOdometerError(0)).toBeNull();
   });
 
   it("rejects non-integers and negatives", () => {
-    expect(manualOdometerError(0, -1)).toBe("Enter a whole number of miles.");
-    expect(manualOdometerError(0, 1.5)).toBe("Enter a whole number of miles.");
+    expect(manualOdometerError(-1)).toBe("Enter a whole number of miles.");
+    expect(manualOdometerError(1.5)).toBe("Enter a whole number of miles.");
   });
 });

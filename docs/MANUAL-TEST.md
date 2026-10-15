@@ -40,7 +40,7 @@ Use this before deploying (locally, phone + Mac) and again after deploying (on t
 
 ## Edge cases worth a poke
 
-- [ ] An odometer reading lower than current is refused; a done job with a lower reading doesn't lower it.
+- [ ] Correcting the odometer down by hand works; a done job or check-in with a lower reading doesn't lower it.
 - [ ] A job blocked by a task can't go Ready until the task is done.
 - [ ] A dependency loop is refused.
 - [ ] Delete an expense, a part, a photo (the file disappears from Gallery), a watch item, a task.

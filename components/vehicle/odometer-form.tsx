@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { updateOdometer } from "@/lib/actions/vehicle";
 import { formatMiles } from "@/lib/format";
 
-/** Rule 14: manual updates may only go up. The server enforces it; this form just reports. */
+/** Manual odometer update: any whole number of miles (corrections allowed). The server validates. */
 export function OdometerForm({ current }: { current: number }) {
   const [saved, setSaved] = useState<number | null>(null);
   const { register, handleSubmit, setError, formState } = useForm<{

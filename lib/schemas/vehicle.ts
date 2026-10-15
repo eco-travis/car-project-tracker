@@ -20,7 +20,7 @@ export const vehicleSchema = z.object({
   purchase_price_cents: optionalMoney("Purchase price"),
 });
 
-/** Vehicle page edits. The odometer has its own form (it can only go up). */
+/** Vehicle page edits. The odometer has its own form. */
 export const vehicleUpdateSchema = vehicleSchema
   .omit({ current_odometer: true })
   .extend({ notes: optionalText });

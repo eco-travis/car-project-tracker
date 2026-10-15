@@ -291,3 +291,10 @@ Travis asked for a much shorter part form and a way to attach a receipt or invoi
 
 - **Optional "Cost" on Add part.** When filled in, `createPart` also inserts a **paid "part" expense dated today**, linked to the part, carrying the part's vendor. Money stays in the ledger (a part's cost is the sum of its expenses), so budgets, rollups, and exports need no changes. The ledger's insert trigger moves a planning-stage part to Ordered, as any expense does. If the expense fails, the part is removed and the error is shown, so a part is never added without the cost the user entered. Edit part has no Cost field: later costs are expenses from the part page. Valid cost amounts are the same as for expense amounts.
 - **Vendor is back on Add part** at Travis's request, and always shown on the part page.
+
+## Manual odometer corrections (2026-10-14)
+
+Travis asked that a manual odometer entry be allowed to go below the current reading. Until now it was refused with "The odometer can't go down." Correcting a mistyped reading has to be possible.
+
+- **Manual updates** (Dashboard and Vehicle) accept any whole number of miles. `manualOdometerError` checks only that it's a non-negative integer.
+- **Automatic raises are unchanged** (spec: "updated whenever a job logs a higher reading"; check-ins likewise). A done job or check-in with a lower reading still never lowers the odometer.

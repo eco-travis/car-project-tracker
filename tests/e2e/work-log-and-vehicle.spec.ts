@@ -67,7 +67,7 @@ test("work log lists done jobs newest first with type, phase, and text filters",
   ).toBeVisible();
 });
 
-test("vehicle page saves notes and only lets the odometer go up", async ({
+test("vehicle page saves notes and lets the odometer be corrected down", async ({
   page,
   user,
 }) => {
@@ -77,9 +77,9 @@ test("vehicle page saves notes and only lets the odometer go up", async ({
 
   await page.getByLabel("Current odometer (miles)").fill("140000");
   await page.getByRole("button", { name: "Update odometer" }).click();
-  await expect(
-    page.getByText("The odometer can't go down. It's at 141,000 miles."),
-  ).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText(
+    "Odometer set to 140,000 mi.",
+  );
 
   await page.getByLabel("Current odometer (miles)").fill("141900");
   await page.getByRole("button", { name: "Update odometer" }).click();
