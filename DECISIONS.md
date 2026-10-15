@@ -298,3 +298,11 @@ Travis asked that a manual odometer entry be allowed to go below the current rea
 
 - **Manual updates** (Dashboard and Vehicle) accept any whole number of miles. `manualOdometerError` checks only that it's a non-negative integer.
 - **Automatic raises are unchanged** (spec: "updated whenever a job logs a higher reading"; check-ins likewise). A done job or check-in with a lower reading still never lowers the odometer.
+
+## Log work from the Work Log (2026-10-14)
+
+Travis asked why he couldn't log work from the Work Log. It only listed Done jobs; logging meant creating a job elsewhere and then marking it done.
+
+- **"Log work" button** on the Work Log. It saves a new job straight as **Done** in one step. Fields: what was done (title), type (default Maintenance), phase (optional), completed on and odometer (pre-filled with today and the current odometer, as in Mark done), performed by (default DIY) plus a shop/garage name or DIY hours, and notes. A follow-up step offers photos (tagged After) and a link to the job.
+- **Same rules as Mark done.** `logWorkSchema` reuses the completion fields and `completionErrors` (date and odometer required). A higher reading raises the vehicle odometer through the existing jobs trigger, in the same insert. A new job has no blockers, so no blocker check is needed.
+- **Tests:** `tests/e2e/log-work.spec.ts`.

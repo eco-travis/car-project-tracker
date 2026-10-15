@@ -3,10 +3,14 @@ import Form from "next/form";
 import Link from "next/link";
 import { z } from "zod";
 import { controlClass } from "@/components/form/field";
+import { LogWorkDialog } from "@/components/jobs/log-work-dialog";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { requireVehicle } from "@/lib/auth";
 import { getWorkLog } from "@/lib/db/queries/jobs";
+import { todayIso } from "@/lib/domain/dates";
+import { completionDefaults } from "@/lib/domain/jobs";
 import { getPhaseOptions } from "@/lib/db/queries/plan";
 import { formatDate, formatMiles } from "@/lib/format";
 import { JOB_TYPE_LABELS, PERFORMED_BY_LABELS, options } from "@/lib/labels";
@@ -31,9 +35,10 @@ export default async function WorkLogPage({ searchParams }: PageProps<"/log">) {
     phase: first(raw.phase) || undefined,
     q: first(raw.q) || undefined,
   });
-  const [entries, phases] = await Promise.all([
+  const [entries, phases, vehicle] = await Promise.all([
     getWorkLog(filters),
     getPhaseOptions(),
+    requireVehicle(),
   ]);
   const filtered = Boolean(filters.type || filters.phase || filters.q);
 
@@ -42,6 +47,12 @@ export default async function WorkLogPage({ searchParams }: PageProps<"/log">) {
       <PageHeader
         title="Work Log"
         description="What has been done, when, at what mileage?"
+        actions={
+          <LogWorkDialog
+            phases={phases}
+            defaults={completionDefaults(todayIso(), vehicle.current_odometer)}
+          />
+        }
       />
       <Form
         key={JSON.stringify(filters)}
@@ -93,7 +104,7 @@ export default async function WorkLogPage({ searchParams }: PageProps<"/log">) {
         <p className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
           {filtered
             ? "No done jobs match these filters."
-            : "No done jobs yet. Mark a job done and it shows up here."}
+            : "No done jobs yet. Use Log work, or mark a job done, and it shows up here."}
         </p>
       ) : (
         <ol

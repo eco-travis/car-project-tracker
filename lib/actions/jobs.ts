@@ -12,6 +12,7 @@ import {
 import type { JobStatus } from "@/lib/domain/types";
 import {
   completionSchema,
+  logWorkSchema,
   dependencySchema,
   jobSchema,
   statusChangeSchema,
@@ -81,6 +82,38 @@ export async function createJob(
     .select("id")
     .single();
   if (error) return fail("Couldn't create the job.");
+  refreshApp();
+  return ok({ id: data.id });
+}
+
+/**
+ * Log work (Work Log screen): a new job saved straight as Done. A new job has no blockers; the
+ * odometer raise (rule 14) happens in the same transaction via jobs_raise_vehicle_odometer.
+ */
+export async function logWork(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const vehicle = await requireVehicle();
+  const parsed = logWorkSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+  const supabase = await createClient();
+  if (
+    !(await phaseBelongsToVehicle(supabase, parsed.data.phase_id, vehicle.id))
+  ) {
+    return fail("Please fix the highlighted fields.", {
+      phase_id: ["Pick one of your phases."],
+    });
+  }
+  const { data, error } = await supabase
+    .from("jobs")
+    .insert({
+      ...parsed.data,
+      vehicle_id: vehicle.id,
+      status: "done" as JobStatus,
+    })
+    .select("id")
+    .single();
+  if (error) return fail("Couldn't log the work.");
   refreshApp();
   return ok({ id: data.id });
 }

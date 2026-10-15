@@ -43,22 +43,38 @@ export type JobFormValues = z.input<typeof jobSchema>;
 export type JobInput = z.output<typeof jobSchema>;
 
 /** Mark done (and editing a done job's completion). Rule 3: date and odometer are required. */
+const completionFields = {
+  completed_on: optionalDate,
+  completed_odometer: optionalInt("Odometer", 0, MAX_ODOMETER),
+  performed_by: optionalEnum(PERFORMED_BY),
+  performer_name: optionalText,
+  diy_hours: optionalDecimal("DIY hours"),
+};
+
+function refineCompletion(
+  c: Parameters<typeof completionErrors>[0],
+  ctx: z.RefinementCtx,
+) {
+  for (const [path, message] of Object.entries(completionErrors(c))) {
+    ctx.addIssue({ code: "custom", path: [path], message });
+  }
+}
+
 export const completionSchema = z
-  .object({
-    completed_on: optionalDate,
-    completed_odometer: optionalInt("Odometer", 0, MAX_ODOMETER),
-    performed_by: optionalEnum(PERFORMED_BY),
-    performer_name: optionalText,
-    diy_hours: optionalDecimal("DIY hours"),
-  })
-  .superRefine((c, ctx) => {
-    for (const [path, message] of Object.entries(completionErrors(c))) {
-      ctx.addIssue({ code: "custom", path: [path], message });
-    }
-  });
+  .object(completionFields)
+  .superRefine(refineCompletion);
 
 export type CompletionFormValues = z.input<typeof completionSchema>;
 export type CompletionInput = z.output<typeof completionSchema>;
+
+/** Log work: record already-finished work as a new Done job in one step (Work Log screen). */
+export const logWorkSchema = jobSchema
+  .pick({ title: true, type: true, phase_id: true, notes: true })
+  .extend(completionFields)
+  .superRefine(refineCompletion);
+
+export type LogWorkFormValues = z.input<typeof logWorkSchema>;
+export type LogWorkInput = z.output<typeof logWorkSchema>;
 
 /** Status changes other than Done (which goes through completionSchema). */
 export const statusChangeSchema = z.object({

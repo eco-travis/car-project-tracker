@@ -34,7 +34,7 @@ Use this before deploying (locally, phone + Mac) and again after deploying (on t
 - [ ] **Promote inspiration (flow 4)** to a part and to a job; promoting again asks before replacing the link.
 - [ ] **Scoped carousel (flow 11):** "View photos" on a job, a phase (includes its jobs), a part, and a watch item.
 - [ ] **Dashboard:** numbers match Vehicle → Money; every card's title opens its screen; the odometer update works.
-- [ ] **Work Log:** type, phase, and text filters.
+- [ ] **Work Log:** Log work (then add photos), and the type, phase, and text filters.
 - [ ] **Exports:** service history with and without costs and receipts, build sheet, Excel (open it), and one CSV.
 - [ ] **Keyboard only:** Tab from the top (Skip to content), open a dialog, Escape closes it, and the carousel's arrows and Escape work.
 
