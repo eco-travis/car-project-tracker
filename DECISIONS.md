@@ -306,3 +306,14 @@ Travis asked why he couldn't log work from the Work Log. It only listed Done job
 - **"Log work" button** on the Work Log. It saves a new job straight as **Done** in one step. Fields: what was done (title), type (default Maintenance), phase (optional), completed on and odometer (pre-filled with today and the current odometer, as in Mark done), performed by (default DIY) plus a shop/garage name or DIY hours, and notes. A follow-up step offers photos (tagged After) and a link to the job.
 - **Same rules as Mark done.** `logWorkSchema` reuses the completion fields and `completionErrors` (date and odometer required). A higher reading raises the vehicle odometer through the existing jobs trigger, in the same insert. A new job has no blockers, so no blocker check is needed.
 - **Tests:** `tests/e2e/log-work.spec.ts`.
+
+## Tools: bought for the project, cost; no storage location (2026-10-14)
+
+Travis: "in tools we need to track if they were purchased for the project. cost is important, storage location is not." This overrides the spec's Tool fields and the "table by status and location" line.
+
+- **New column `tools.bought_for_project`** (migration `20261014000001_tool_purchase.sql`, default false). It's backfilled to true for tools that already have a positive tool expense. Set it with a checkbox on Add and Edit tool.
+- **Optional Cost on Add tool**, as on Add part: a paid **tool** expense dated today, linked to the tool. If the expense fails, the tool is removed. Rule 4 is unchanged: tool spend is its own category in the totals. The Tools table already shows each tool's cost from its expenses. Later costs use the row's Add expense button.
+- **Tools page:** a "For project" column replaces Location. A "Bought for this project" filter (`?project=1`) and a summary line ("Bought for this project: N tools, $X") are added. Sorted by status, then name.
+- **Storage location** is gone from the form, the Tools table, and the job's Tools panel. The column stays, so older data isn't lost and still appears in the full-data export.
+- **Production:** this migration needs `supabase db push`, which runs only with Travis's approval at deploy time.
+- **Tests:** `tests/e2e/tools.spec.ts`. The demo seed sets the flag on every row: bulk inserts send the union of keys.

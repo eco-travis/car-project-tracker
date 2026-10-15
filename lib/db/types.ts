@@ -645,14 +645,14 @@ isOneToOne: false
                   ]
                 },"tools": {
                   Row: {
-                    "brand": string | null,"created_at": string,"description": string | null,"id": string,"name": string,"notes": string | null,"owner_id": string,"status": Database["public"]['Enums']["tool_status"],"storage_location": string | null,"updated_at": string,"vehicle_id": string | null
+                    "bought_for_project": boolean,"brand": string | null,"created_at": string,"description": string | null,"id": string,"name": string,"notes": string | null,"owner_id": string,"status": Database["public"]['Enums']["tool_status"],"storage_location": string | null,"updated_at": string,"vehicle_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "brand"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"name": string,"notes"?: string | null,"owner_id"?: string,"status"?: Database["public"]['Enums']["tool_status"],"storage_location"?: string | null,"updated_at"?: string,"vehicle_id"?: string | null
+                    "bought_for_project"?: boolean,"brand"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"name": string,"notes"?: string | null,"owner_id"?: string,"status"?: Database["public"]['Enums']["tool_status"],"storage_location"?: string | null,"updated_at"?: string,"vehicle_id"?: string | null
                   }
                   Update: {
-                    "brand"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"name"?: string,"notes"?: string | null,"owner_id"?: string,"status"?: Database["public"]['Enums']["tool_status"],"storage_location"?: string | null,"updated_at"?: string,"vehicle_id"?: string | null
+                    "bought_for_project"?: boolean,"brand"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"name"?: string,"notes"?: string | null,"owner_id"?: string,"status"?: Database["public"]['Enums']["tool_status"],"storage_location"?: string | null,"updated_at"?: string,"vehicle_id"?: string | null
                   }
                   Relationships: [
                     {

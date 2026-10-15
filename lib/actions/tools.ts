@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { requireVehicle } from "@/lib/auth";
 import { createClient } from "@/lib/db/server";
-import { jobToolSchema, toolSchema } from "@/lib/schemas/tool";
+import { todayIso } from "@/lib/domain/dates";
+import { jobToolSchema, newToolSchema, toolSchema } from "@/lib/schemas/tool";
 import { linksBelongToVehicle } from "./ownership";
 import { refreshApp } from "./refresh";
 import { fail, invalid, ok, type ActionResult } from "./result";
@@ -13,7 +14,7 @@ export async function createTool(
   jobId?: unknown,
 ): Promise<ActionResult<{ id: string }>> {
   const vehicle = await requireVehicle();
-  const parsed = toolSchema.safeParse(input);
+  const parsed = newToolSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
   const supabase = await createClient();
   const job = jobId === undefined ? null : z.uuid().safeParse(jobId);
@@ -25,12 +26,28 @@ export async function createTool(
     return fail("Job not found.");
   }
 
+  const { cost_cents, ...fields } = parsed.data;
   const { data, error } = await supabase
     .from("tools")
-    .insert({ ...parsed.data, vehicle_id: vehicle.id })
+    .insert({ ...fields, vehicle_id: vehicle.id })
     .select("id")
     .single();
   if (error) return fail("Couldn't create the tool.");
+  if (cost_cents !== null) {
+    // Money lives in the ledger (a tool's cost is the sum of its expenses; rule 4 category).
+    const { error: expenseError } = await supabase.from("expenses").insert({
+      vehicle_id: vehicle.id,
+      tool_id: data.id,
+      spent_on: todayIso(),
+      amount_cents: cost_cents,
+      category: "tool",
+      state: "paid",
+    });
+    if (expenseError) {
+      await supabase.from("tools").delete().eq("id", data.id);
+      return fail("Couldn't save the cost, so the tool wasn't added.");
+    }
+  }
   if (job?.success)
     await supabase
       .from("job_tools")

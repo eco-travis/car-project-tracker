@@ -24,25 +24,32 @@ export const metadata: Metadata = { title: "Tools" };
 
 const filtersSchema = z.object({
   status: z.enum(TOOL_STATUSES).optional().catch(undefined),
+  project: z.literal("1").optional().catch(undefined),
 });
 
 export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
   const raw = await searchParams;
-  const status = Array.isArray(raw.status) ? raw.status[0] : raw.status;
-  const filters = filtersSchema.parse({ status: status || undefined });
+  const first = (v: string | string[] | undefined) =>
+    (Array.isArray(v) ? v[0] : v) || undefined;
+  const filters = filtersSchema.parse({
+    status: first(raw.status),
+    project: first(raw.project),
+  });
   const [all, links] = await Promise.all([getTools(), getLinkOptions()]);
   const today = todayIso();
 
-  // "Table by status and location": status order, then location, then name.
+  // By status, then name. (Storage location isn't tracked in the UI: Travis's call.)
   const rank = new Map(TOOL_STATUSES.map((s, i) => [s, i]));
   const tools = all
     .filter((t) => !filters.status || t.status === filters.status)
+    .filter((t) => !filters.project || t.bought_for_project)
     .sort(
       (a, b) =>
         rank.get(a.status)! - rank.get(b.status)! ||
-        (a.storage_location ?? "~").localeCompare(b.storage_location ?? "~") ||
         a.name.localeCompare(b.name),
     );
+  const bought = all.filter((t) => t.bought_for_project);
+  const boughtCents = bought.reduce((sum, t) => sum + t.spent_cents, 0);
 
   return (
     <>
@@ -60,7 +67,7 @@ export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
         }
       />
       <Form
-        key={filters.status ?? "all"}
+        key={`${filters.status ?? "all"}-${filters.project ?? ""}`}
         action="/tools"
         aria-label="Filter tools"
         className="mb-4 flex flex-wrap items-end gap-2"
@@ -83,14 +90,37 @@ export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
             ))}
           </select>
         </div>
+        <label className="flex h-8 items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="project"
+            value="1"
+            defaultChecked={filters.project === "1"}
+            className="size-4 accent-current"
+          />
+          Bought for this project
+        </label>
         <Button type="submit" variant="outline">
           Apply
         </Button>
       </Form>
+      {bought.length > 0 && (
+        <p className="text-muted-foreground mb-4 text-sm">
+          Bought for this project: {bought.length}{" "}
+          {bought.length === 1 ? "tool" : "tools"}
+          {boughtCents !== 0 && (
+            <>
+              , <Money cents={boughtCents} />
+            </>
+          )}
+        </p>
+      )}
 
       {tools.length === 0 ? (
         <p className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-          {filters.status ? "No tools with that status." : "No tools yet."}
+          {filters.status || filters.project
+            ? "No tools match these filters."
+            : "No tools yet."}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border">
@@ -108,7 +138,7 @@ export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
                   scope="col"
                   className="hidden px-3 py-2 font-medium sm:table-cell"
                 >
-                  Location
+                  For project
                 </th>
                 <th
                   scope="col"
@@ -136,15 +166,17 @@ export default async function ToolsPage({ searchParams }: PageProps<"/tools">) {
                         {t.description}
                       </p>
                     )}
-                    <p className="text-muted-foreground text-xs sm:hidden">
-                      {t.storage_location}
-                    </p>
+                    {t.bought_for_project && (
+                      <p className="text-muted-foreground text-xs sm:hidden">
+                        Bought for this project
+                      </p>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <ToolStatusBadge status={t.status} />
                   </td>
                   <td className="hidden px-3 py-2 sm:table-cell">
-                    {t.storage_location}
+                    {t.bought_for_project ? "Yes" : ""}
                   </td>
                   <td className="hidden px-3 py-2 md:table-cell">
                     {t.jobs.map((j, i) => (

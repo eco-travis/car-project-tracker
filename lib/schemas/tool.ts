@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { optionalText } from "./fields";
+import { optionalMoney, optionalText } from "./fields";
 
 export const TOOL_STATUSES = [
   "owned",
@@ -13,12 +13,17 @@ export const toolSchema = z.object({
   brand: optionalText,
   description: optionalText,
   status: z.enum(TOOL_STATUSES),
-  storage_location: optionalText,
+  bought_for_project: z.boolean(),
   notes: optionalText,
 });
 
-export type ToolFormValues = z.input<typeof toolSchema>;
-export type ToolInput = z.output<typeof toolSchema>;
+/** Add tool can also record what it cost: a paid "tool" expense dated today, linked to it. */
+export const newToolSchema = toolSchema.extend({
+  cost_cents: optionalMoney("Cost"),
+});
+
+export type ToolFormValues = z.input<typeof newToolSchema>;
+export type ToolInput = z.output<typeof newToolSchema>;
 
 export const jobToolSchema = z.object({
   job_id: z.uuid(),

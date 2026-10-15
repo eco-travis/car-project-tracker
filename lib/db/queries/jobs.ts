@@ -58,7 +58,7 @@ export async function getJob(id: string) {
     supabase.from("v_job_costs").select("*").eq("job_id", id).maybeSingle(),
     supabase
       .from("job_tools")
-      .select("tool:tools(id, name, status, storage_location)")
+      .select("tool:tools(id, name, status)")
       .eq("job_id", id),
     supabase.from("tools").select("id, name").order("name"),
     supabase

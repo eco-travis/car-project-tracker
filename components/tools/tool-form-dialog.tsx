@@ -21,7 +21,7 @@ import {
 import { createTool, updateTool } from "@/lib/actions/tools";
 import { TOOL_STATUS_LABELS, options } from "@/lib/labels";
 import {
-  toolSchema,
+  newToolSchema,
   type ToolFormValues,
   type ToolInput,
 } from "@/lib/schemas/tool";
@@ -32,7 +32,7 @@ export type EditableTool = {
   brand: string | null;
   description: string | null;
   status: ToolFormValues["status"];
-  storage_location: string | null;
+  bought_for_project: boolean;
   notes: string | null;
 };
 
@@ -52,12 +52,13 @@ export function ToolFormDialog({
     brand: tool?.brand ?? "",
     description: tool?.description ?? "",
     status: tool?.status ?? "owned",
-    storage_location: tool?.storage_location ?? "",
+    bought_for_project: tool?.bought_for_project ?? false,
+    cost_cents: "",
     notes: tool?.notes ?? "",
   };
   const { register, handleSubmit, getValues, setError, reset, formState } =
     useForm<ToolFormValues, unknown, ToolInput>({
-      resolver: zodResolver(toolSchema),
+      resolver: zodResolver(newToolSchema),
       defaultValues: defaults,
     });
   const { errors, isSubmitting } = formState;
@@ -112,14 +113,29 @@ export function ToolFormDialog({
             error={errors.status?.message}
             {...register("status")}
           />
-          <TextField
-            id="tool-location"
-            label="Storage location"
-            placeholder="Shelf, drawer, bin"
-            className="sm:col-span-2"
-            error={errors.storage_location?.message}
-            {...register("storage_location")}
-          />
+          {!tool && (
+            <TextField
+              id="tool-cost"
+              label="Cost (optional)"
+              inputMode="decimal"
+              placeholder="0.00"
+              hint="Adds a paid tool expense dated today."
+              error={errors.cost_cents?.message}
+              {...register("cost_cents")}
+            />
+          )}
+          <label
+            htmlFor="tool-bought"
+            className="flex items-center gap-2 self-end pb-2 text-sm"
+          >
+            <input
+              id="tool-bought"
+              type="checkbox"
+              className="size-4 accent-current"
+              {...register("bought_for_project")}
+            />
+            Bought for this project
+          </label>
           <TextareaField
             id="tool-description"
             label="Description"

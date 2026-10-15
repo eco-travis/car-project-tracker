@@ -12,7 +12,6 @@ type Tool = {
   id: string;
   name: string;
   status: "owned" | "borrowed" | "rented" | "need_to_buy";
-  storage_location: string | null;
 };
 
 export function JobToolsPanel({
@@ -45,15 +44,7 @@ export function JobToolsPanel({
               key={t.id}
               className="flex items-center gap-2 px-3 py-2 text-sm"
             >
-              <span className="min-w-0 flex-1 truncate">
-                {t.name}
-                {t.storage_location && (
-                  <span className="text-muted-foreground text-xs">
-                    {" "}
-                    · {t.storage_location}
-                  </span>
-                )}
-              </span>
+              <span className="min-w-0 flex-1 truncate">{t.name}</span>
               <ToolStatusBadge status={t.status} />
               <Button
                 variant="ghost"

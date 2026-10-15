@@ -325,20 +325,21 @@ export async function seedDemo(
           vehicle_id,
           name: "27mm triple-square socket",
           status: "owned",
-          storage_location: "Drawer 2",
+          bought_for_project: true,
         },
         {
           owner_id,
           vehicle_id,
           name: "Coolant pressure tester",
           status: "borrowed",
-          storage_location: "Shelf A",
+          bought_for_project: false,
         },
         {
           owner_id,
           vehicle_id,
           name: "Ball joint press",
           status: "need_to_buy",
+          bought_for_project: false,
         },
       ])
       .select("id, name"),
