@@ -275,3 +275,14 @@ Travis asked to delete parts straight from the main list.
 - **Each Parts row has a trash button** (`DeletePartButton`, shared with the part page's Delete). Both use the same confirmation, which states the effects: linked expenses stay in the ledger unlinked (money history is kept); the part's photos and files are deleted; links from tasks, watch items, and replaced parts are removed. Deleting from the part page returns to the list.
 - **Fix:** deleting a part cascaded its attachment rows but left their files in Storage. `deletePart` now removes the stored files first, as attachment and inspiration deletes already did.
 - **Tests:** `tests/e2e/delete-part.spec.ts` covers cancel, confirm, the expense kept with `part_id = null`, Storage emptied, and the task kept without its link.
+
+## Simpler Add part form, receipts on parts (2026-10-14)
+
+Travis asked for a much shorter part form and a way to attach a receipt or invoice.
+
+- **Add part** now asks only for Name, Category, Status, Quantity, OEM part number, Web link (`product_url`), Notes, and an optional **receipt or invoice** (a photo or PDF, saved as a `receipt` attachment on the new part, so it's kept out of the Gallery). If the part saves but the receipt upload fails, the dialog says so instead of failing silently.
+- **Removed from Add part:** brand, vendor, fitment notes, superseded numbers, aftermarket part number, job, replaces, order number, return by, warranty notes.
+- **The columns stay.** The spec defines them, the demo and existing data use them, and exports include them. **Edit part** keeps them under a collapsed "More details", which opens on its own if one of its fields has an error. The part page lists them only when filled in.
+- **Adding a part from a job's page** still links it to that job (as a hidden preset).
+- **The part page** has an "Add receipt or invoice" button.
+- **Tests:** `tests/e2e/part-form.spec.ts`.

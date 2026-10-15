@@ -1,10 +1,11 @@
 "use client";
 
-import { ClientTrigger } from "@/components/client-trigger";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Paperclip, X } from "lucide-react";
+import { ClientTrigger } from "@/components/client-trigger";
 import { applyActionErrors } from "@/components/form/apply-errors";
 import { FormError } from "@/components/form/form-error";
 import { SelectField } from "@/components/form/select-field";
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { createPart, updatePart } from "@/lib/actions/parts";
 import type { Option } from "@/lib/db/queries/options";
+import type { Database } from "@/lib/db/types";
 import {
   PART_CATEGORY_LABELS,
   PART_STATUS_LABELS,
@@ -31,10 +33,19 @@ import {
   type PartFormValues,
   type PartInput,
 } from "@/lib/schemas/part";
-import type { Database } from "@/lib/db/types";
+import { uploadFile } from "@/lib/upload/client";
 
 type Part = Database["public"]["Tables"]["parts"]["Row"];
 
+/** Receipts and invoices: photos or PDFs, filed as kind "receipt". */
+const RECEIPT_TYPES = "image/*,application/pdf";
+
+/**
+ * Add part: name, category, status, quantity, OEM number, web link, notes, and an optional
+ * receipt or invoice.
+ * Edit part: the same essentials, with the rest of the spec's part fields under "More details"
+ * (kept so existing data stays editable). A job is still linked when adding from a job's page.
+ */
 export function PartFormDialog({
   part,
   jobs,
@@ -53,6 +64,8 @@ export function PartFormDialog({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const receiptInput = useRef<HTMLInputElement>(null);
   const defaults: PartFormValues = {
     name: part?.name ?? "",
     brand: part?.brand ?? "",
@@ -78,6 +91,20 @@ export function PartFormDialog({
       defaultValues: defaults,
     });
   const { errors, isSubmitting } = formState;
+  const moreDetailsError = (
+    [
+      "brand",
+      "vendor",
+      "fitment_notes",
+      "superseded_numbers",
+      "aftermarket_part_number",
+      "job_id",
+      "replaces_part_id",
+      "order_number",
+      "return_by",
+      "warranty_notes",
+    ] as const
+  ).some((f) => errors[f]);
   const toOptions = (xs: Option[]) =>
     xs
       .filter((x) => x.id !== part?.id)
@@ -91,8 +118,23 @@ export function PartFormDialog({
     }
     const result = await createPart(getValues());
     if (!result.ok) return applyActionErrors(result, setError);
+    if (receipt) {
+      const upload = await uploadFile(receipt, {
+        parent: { kind: "part", id: result.data.id },
+        receipt: true,
+      });
+      if (!upload.ok) {
+        // The part exists; say so rather than failing silently, and let them retry from its page.
+        setError("root", {
+          message: `Part saved, but the receipt didn't upload: ${upload.error}`,
+        });
+        router.refresh();
+        return;
+      }
+    }
     setOpen(false);
     if (openAfterCreate) router.push(`/parts/${result.data.id}`);
+    else router.refresh();
   });
 
   return (
@@ -100,13 +142,16 @@ export function PartFormDialog({
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) reset(defaults);
+        if (next) {
+          reset(defaults);
+          setReceipt(null);
+        }
       }}
     >
       <DialogTrigger asChild>
         <ClientTrigger>{trigger}</ClientTrigger>
       </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{part ? "Edit part" : "Add part"}</DialogTitle>
         </DialogHeader>
@@ -122,12 +167,6 @@ export function PartFormDialog({
             className="sm:col-span-2"
             error={errors.name?.message}
             {...register("name")}
-          />
-          <TextField
-            id="part-brand"
-            label="Brand"
-            error={errors.brand?.message}
-            {...register("brand")}
           />
           <SelectField
             id="part-category"
@@ -157,84 +196,156 @@ export function PartFormDialog({
             {...register("oem_part_number")}
           />
           <TextField
-            id="part-superseded"
-            label="Superseded numbers"
-            hint="Separate with commas."
-            error={errors.superseded_numbers?.message}
-            {...register("superseded_numbers")}
-          />
-          <TextField
-            id="part-aftermarket"
-            label="Aftermarket part number"
-            error={errors.aftermarket_part_number?.message}
-            {...register("aftermarket_part_number")}
-          />
-          <SelectField
-            id="part-job"
-            label="Job"
-            emptyLabel="None"
-            hint="The job that installs (or removed) it."
-            options={toOptions(jobs)}
-            error={errors.job_id?.message}
-            {...register("job_id")}
-          />
-          <SelectField
-            id="part-replaces"
-            label="Replaces"
-            emptyLabel="None"
-            hint="The stock part it removed, if tracked."
-            options={toOptions(parts)}
-            error={errors.replaces_part_id?.message}
-            {...register("replaces_part_id")}
-          />
-          <TextareaField
-            id="part-fitment"
-            label="Fitment notes"
-            rows={2}
-            hint="955 vs. 957, Touareg/Q7 cross-fit."
-            error={errors.fitment_notes?.message}
-            {...register("fitment_notes")}
-          />
-          <TextField
-            id="part-vendor"
-            label="Vendor"
-            error={errors.vendor?.message}
-            {...register("vendor")}
-          />
-          <TextField
             id="part-url"
-            label="Product link"
+            label="Web link"
             inputMode="url"
+            placeholder="https://"
             error={errors.product_url?.message}
             {...register("product_url")}
-          />
-          <TextField
-            id="part-order"
-            label="Order number"
-            error={errors.order_number?.message}
-            {...register("order_number")}
-          />
-          <TextField
-            id="part-return-by"
-            label="Return by"
-            type="date"
-            error={errors.return_by?.message}
-            {...register("return_by")}
-          />
-          <TextareaField
-            id="part-warranty"
-            label="Warranty notes"
-            rows={2}
-            error={errors.warranty_notes?.message}
-            {...register("warranty_notes")}
           />
           <TextareaField
             id="part-notes"
             label="Notes"
             rows={2}
+            className="sm:col-span-2"
             error={errors.notes?.message}
             {...register("notes")}
           />
+
+          {!part && (
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <span className="text-sm font-medium">
+                Receipt or invoice (optional)
+              </span>
+              <input
+                ref={receiptInput}
+                type="file"
+                accept={RECEIPT_TYPES}
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+              />
+              {receipt ? (
+                <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                  <Paperclip className="size-4 shrink-0" aria-hidden />
+                  <span className="min-w-0 flex-1 truncate">
+                    {receipt.name}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label="Remove receipt"
+                    onClick={() => {
+                      setReceipt(null);
+                      if (receiptInput.current) receiptInput.current.value = "";
+                    }}
+                  >
+                    <X aria-hidden />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="self-start"
+                  onClick={() => receiptInput.current?.click()}
+                >
+                  <Paperclip aria-hidden /> Attach receipt or invoice
+                </Button>
+              )}
+              <p className="text-muted-foreground text-xs">
+                A photo or PDF. It&apos;s saved on the part and kept out of the
+                Gallery.
+              </p>
+            </div>
+          )}
+
+          {part && (
+            // Opens itself when one of its fields has an error, so the message is visible.
+            <details
+              open={moreDetailsError || undefined}
+              className="rounded-lg border p-3 sm:col-span-2"
+            >
+              <summary className="cursor-pointer text-sm font-medium">
+                More details
+              </summary>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <TextField
+                  id="part-brand"
+                  label="Brand"
+                  error={errors.brand?.message}
+                  {...register("brand")}
+                />
+                <TextField
+                  id="part-vendor"
+                  label="Vendor"
+                  error={errors.vendor?.message}
+                  {...register("vendor")}
+                />
+                <TextareaField
+                  id="part-fitment"
+                  label="Fitment notes"
+                  rows={2}
+                  hint="955 vs. 957, Touareg/Q7 cross-fit."
+                  error={errors.fitment_notes?.message}
+                  {...register("fitment_notes")}
+                />
+                <TextField
+                  id="part-superseded"
+                  label="Superseded numbers"
+                  hint="Separate with commas."
+                  error={errors.superseded_numbers?.message}
+                  {...register("superseded_numbers")}
+                />
+                <TextField
+                  id="part-aftermarket"
+                  label="Aftermarket part number"
+                  error={errors.aftermarket_part_number?.message}
+                  {...register("aftermarket_part_number")}
+                />
+                <SelectField
+                  id="part-job"
+                  label="Job"
+                  emptyLabel="None"
+                  hint="The job that installs (or removed) it."
+                  options={toOptions(jobs)}
+                  error={errors.job_id?.message}
+                  {...register("job_id")}
+                />
+                <SelectField
+                  id="part-replaces"
+                  label="Replaces"
+                  emptyLabel="None"
+                  hint="The stock part it removed, if tracked."
+                  options={toOptions(parts)}
+                  error={errors.replaces_part_id?.message}
+                  {...register("replaces_part_id")}
+                />
+                <TextField
+                  id="part-order"
+                  label="Order number"
+                  error={errors.order_number?.message}
+                  {...register("order_number")}
+                />
+                <TextField
+                  id="part-return-by"
+                  label="Return by"
+                  type="date"
+                  error={errors.return_by?.message}
+                  {...register("return_by")}
+                />
+                <TextareaField
+                  id="part-warranty"
+                  label="Warranty notes"
+                  rows={2}
+                  error={errors.warranty_notes?.message}
+                  {...register("warranty_notes")}
+                />
+              </div>
+            </details>
+          )}
           <FormError
             message={errors.root?.message}
             className="text-destructive text-sm sm:col-span-2"

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { AttachmentsPanel } from "@/components/media/attachments-panel";
+import { UploadButton } from "@/components/media/upload-button";
 import { ViewPhotosButton } from "@/components/media/view-photos-button";
 import { Money } from "@/components/money";
 import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
@@ -129,24 +130,31 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
           Details
         </h2>
         <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <Detail label="Job">
-            {part.job ? (
+          {/* Essentials always show; the optional "More details" fields only when filled in. */}
+          <Detail label="OEM part number" mono>
+            {part.oem_part_number ?? "—"}
+          </Detail>
+          {part.vendor && <Detail label="Vendor">{part.vendor}</Detail>}
+          {part.fitment_notes && (
+            <Detail label="Fitment notes">{part.fitment_notes}</Detail>
+          )}
+          <Detail label="Notes">
+            <span className="whitespace-pre-wrap">{part.notes ?? "—"}</span>
+          </Detail>
+          {part.job && (
+            <Detail label="Job">
               <Link href={`/jobs/${part.job.id}`} className="underline">
                 {part.job.title}
               </Link>
-            ) : (
-              "—"
-            )}
-          </Detail>
-          <Detail label="Replaces">
-            {part.replaces ? (
+            </Detail>
+          )}
+          {part.replaces && (
+            <Detail label="Replaces">
               <Link href={`/parts/${part.replaces.id}`} className="underline">
                 {part.replaces.name}
               </Link>
-            ) : (
-              "—"
-            )}
-          </Detail>
+            </Detail>
+          )}
           {data.replacedBy.length > 0 && (
             <Detail label="Replaced by">
               {data.replacedBy.map((r, i) => (
@@ -159,22 +167,23 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
               ))}
             </Detail>
           )}
-          <Detail label="OEM part number" mono>
-            {part.oem_part_number ?? "—"}
-          </Detail>
-          <Detail label="Superseded numbers" mono>
-            {part.superseded_numbers.join(", ") || "—"}
-          </Detail>
-          <Detail label="Aftermarket part number" mono>
-            {part.aftermarket_part_number ?? "—"}
-          </Detail>
-          <Detail label="Fitment notes">{part.fitment_notes ?? "—"}</Detail>
-          <Detail label="Vendor">{part.vendor ?? "—"}</Detail>
-          <Detail label="Order number" mono>
-            {part.order_number ?? "—"}
-          </Detail>
-          <Detail label="Product link">
-            {part.product_url ? (
+          {part.superseded_numbers.length > 0 && (
+            <Detail label="Superseded numbers" mono>
+              {part.superseded_numbers.join(", ")}
+            </Detail>
+          )}
+          {part.aftermarket_part_number && (
+            <Detail label="Aftermarket part number" mono>
+              {part.aftermarket_part_number}
+            </Detail>
+          )}
+          {part.order_number && (
+            <Detail label="Order number" mono>
+              {part.order_number}
+            </Detail>
+          )}
+          {part.product_url && (
+            <Detail label="Web link">
               <a
                 href={part.product_url}
                 target="_blank"
@@ -183,17 +192,14 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
               >
                 {part.product_url}
               </a>
-            ) : (
-              "—"
-            )}
-          </Detail>
-          <Detail label="Return by">
-            {part.return_by ? formatDate(part.return_by) : "—"}
-          </Detail>
-          <Detail label="Warranty notes">{part.warranty_notes ?? "—"}</Detail>
-          <Detail label="Notes">
-            <span className="whitespace-pre-wrap">{part.notes ?? "—"}</span>
-          </Detail>
+            </Detail>
+          )}
+          {part.return_by && (
+            <Detail label="Return by">{formatDate(part.return_by)}</Detail>
+          )}
+          {part.warranty_notes && (
+            <Detail label="Warranty notes">{part.warranty_notes}</Detail>
+          )}
         </dl>
       </section>
 
@@ -205,7 +211,14 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
           <h2 id="part-photos-heading" className="font-semibold">
             Photos and files
           </h2>
-          <ViewPhotosButton scope={{ kind: "part", id: part.id }} />
+          <div className="flex flex-wrap items-start gap-2">
+            <UploadButton
+              parent={{ kind: "part", id: part.id }}
+              receipt
+              label="Add receipt or invoice"
+            />
+            <ViewPhotosButton scope={{ kind: "part", id: part.id }} />
+          </div>
         </div>
         <AttachmentsPanel
           parent={{ kind: "part", id: part.id }}
