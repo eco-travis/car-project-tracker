@@ -25,6 +25,8 @@ Build milestones M0 through M9 in order. A milestone is done only when every acc
 - Production migrations (`supabase db push`) run only after the human approves in chat.
 - Deployment is deferred (see `DECISIONS.md`): the definition-of-done smoke check runs against `npm run preview` with local Supabase instead of Vercel.
 
+**Local data is real.** Travis enters his actual build into the local database. Never run `db:reset`, `db:fresh`, `db:seed`, `db:restore`, `supabase db reset`, or `supabase stop --no-backup` without his explicit go-ahead in chat. Apply new migrations with `npm run db:migrate` (backs up first, then `supabase migration up`). Tests use throwaway users and never touch his account.
+
 **Stop and ask the human when:**
 
 1. A step needs an account, a dashboard setting, or a secret (see the plan's Human setup).
@@ -45,8 +47,11 @@ npm run test        # unit + database (Vitest)
 npm run test:e2e    # Playwright, desktop 1280x800 + phone 390x844 (dev server)
 npm run test:e2e:preview  # same suite against a production build
 npm run db:start    # supabase start (needs Docker running)
-npm run db:reset    # supabase db reset, then db:seed
-npm run db:seed     # demo data owned by ALLOWED_EMAIL (local only)
+npm run db:migrate  # back up, then apply new migrations without touching data (use this)
+npm run db:backup   # back up local data + files to backups/<timestamp>/ (gitignored)
+npm run db:restore -- backups/<timestamp>   # replace local data with a backup (asks first: destructive)
+npm run db:reset    # WIPES local data (guarded: refuses while you have data unless WIPE_MY_DATA=1)
+npm run db:seed     # demo data for ALLOWED_EMAIL (guarded the same way)
 npm run db:dev-password  # local password for DEV_AUTO_LOGIN (skips the magic link in `npm run dev`)
 npm run db:types    # regenerate lib/db/types.ts
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/make-icons.mts  # re-render app icons

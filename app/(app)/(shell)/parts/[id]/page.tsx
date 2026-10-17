@@ -101,7 +101,11 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
         aria-label="Status and actions"
         className="flex flex-wrap items-end justify-between gap-4 rounded-xl border p-4"
       >
-        <PartStatusControl partId={part.id} status={part.status} />
+        <PartStatusControl
+          partId={part.id}
+          status={part.status}
+          installedOn={part.installed_on}
+        />
         <div className="flex flex-wrap gap-2">
           <ExpenseFormDialog
             options={links}

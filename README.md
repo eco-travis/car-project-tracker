@@ -17,7 +17,7 @@ npm install
 npx playwright install chromium        # browsers for the end-to-end tests
 npm run db:start                       # starts local Supabase in Docker (first run downloads images)
 cp .env.example .env.local             # then fill it in (see below)
-npm run db:reset                       # applies migrations, loads demo data, sets the dev password
+npm run db:reset                       # first time only: applies migrations, loads demo data, sets the dev password
 npm run dev                            # http://localhost:3000
 ```
 
@@ -54,14 +54,21 @@ npm run format           # prettier --write (CI runs format:check)
 npm run test             # unit + database tests (needs local Supabase)
 npm run test:e2e         # Playwright, desktop 1280x800 + phone 390x844; can run while `npm run dev` is up
 npm run test:e2e:preview # the same suite against a production build
-npm run db:reset         # reset local database, re-seed demo data
-npm run db:seed          # demo data only (replaces ALLOWED_EMAIL's vehicle)
-npm run db:fresh         # empty database + your user (onboarding), for entering your real car
+npm run db:migrate       # apply new migrations safely: backs up first, keeps your data
+npm run db:backup        # back up local data and photos to backups/<timestamp>/ (gitignored)
+npm run db:restore -- backups/<timestamp>  # put a backup back (replaces current local data)
+npm run db:reset         # wipe and re-seed demo data (refuses while you have data)
+npm run db:seed          # demo data only (refuses while you have data)
+npm run db:fresh         # empty database + your user (refuses while you have data)
 npm run dev:lan          # dev server reachable from your phone on the same Wi-Fi
 npm run db:types         # regenerate lib/db/types.ts after a migration
 ```
 
-Schema changes are new files in `supabase/migrations/`; never edit one that has been applied. Run `npm run db:types` afterwards and commit the result.
+Schema changes are new files in `supabase/migrations/`; never edit one that has been applied. Apply them locally with `npm run db:migrate` (it backs up, applies, and regenerates `lib/db/types.ts`); commit the types.
+
+### Your local data is safe by default
+
+`db:reset`, `db:fresh`, and `db:seed` refuse to run while your account has any data, and tell you to use `db:migrate` instead. To wipe on purpose: `WIPE_MY_DATA=1 npm run db:reset` (a backup is taken first). Tests create throwaway accounts and never touch yours. Back up before anything risky with `npm run db:backup`; backups include photos and files.
 
 ## Deploy (Vercel + Supabase)
 

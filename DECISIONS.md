@@ -330,3 +330,18 @@ Travis: "i need to be able to track when i installed something." The spec has no
 - **Shown** on the part page (Details) and under the status badge in the Parts list.
 - **Production:** this migration needs `supabase db push`, with Travis's approval at deploy.
 - **Tests:** `tests/e2e/part-installed-on.spec.ts`.
+
+## Local data is real: no more demo re-seeds (2026-10-16)
+
+Travis is entering his actual build locally. Twice, after the tools and install-date migrations, I re-seeded demo data with `npm run db:seed`, which replaces ALLOWED_EMAIL's vehicle. That deleted whatever he had entered. The dev server log shows his saves to Parts and Tools, but there was no backup, so those entries couldn't be recovered.
+
+- **Demo data cleared** from his account (vehicle and everything under it, including the 3 demo tools, which outlive the vehicle via `on delete set null`), after a backup and a check that every row came from the seed. He starts at onboarding.
+- **Guards:** `db:reset`, `db:fresh`, and `db:seed` run `scripts/db-guard.mts` first. It refuses while the owner has any data, and points to `db:migrate`. `WIPE_MY_DATA=1` overrides, after an automatic backup.
+- **`npm run db:migrate`** backs up, then runs `supabase migration up --local` (applies only new migrations, keeps data) and regenerates types. This is now the only way schema changes reach his local database.
+- **`npm run db:backup` / `db:restore`:**
+  - The backup is a data-only `pg_dump` of public plus auth (users and identities, so ids match; sessions and tokens skipped), plus every stored file belonging to an existing user, in `backups/<timestamp>/` (gitignored).
+  - Restore runs a fresh `db reset` from the migrations, loads the rows with triggers disabled, and re-uploads the files.
+  - Round-trip verified.
+- **Test cleanup:** the e2e user fixture now deletes a test user's stored files as well as the user. About 3,750 orphaned test files were purged.
+- **`CLAUDE.md`** now says local data is real and lists the commands never to run without Travis's go-ahead.
+- **Install date editable in place (2026-10-16):** the part page shows an "Installed on" date input beside the status dropdown for Installed parts (or any part with a date). It saves on change through `setPartInstalledOn`. Setting the status to Installed still dates the part today, and the field re-keys to show that date. Edit part keeps its own Installed on field.

@@ -11,6 +11,7 @@ import {
 } from "@/lib/domain/parts";
 import {
   newPartSchema,
+  partInstalledOnSchema,
   partSchema,
   partStatusSchema,
 } from "@/lib/schemas/part";
@@ -151,6 +152,27 @@ export async function deletePart(id: unknown): Promise<ActionResult> {
 }
 
 /** Rule 8: any status can be set by hand. */
+export async function setPartInstalledOn(
+  id: unknown,
+  input: unknown,
+): Promise<ActionResult> {
+  await requireVehicle();
+  const partId = z.uuid().safeParse(id);
+  const parsed = partInstalledOnSchema.safeParse(input);
+  if (!partId.success) return fail("Part not found.");
+  if (!parsed.success) return fail("Pick a date.");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("parts")
+    .update(parsed.data)
+    .eq("id", partId.data)
+    .select("id");
+  if (error) return fail("Couldn't change the install date.");
+  if (!data.length) return fail("Part not found.");
+  refreshApp();
+  return ok();
+}
+
 export async function setPartStatus(
   id: unknown,
   input: unknown,

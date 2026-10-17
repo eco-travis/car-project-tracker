@@ -5,9 +5,7 @@ Use this before deploying (locally, phone + Mac) and again after deploying (on t
 ## Set up (local)
 
 1. Docker Desktop running, then `npm run db:start`.
-2. Pick your data:
-   - **Demo build:** `npm run db:reset` (5 phases, jobs, parts, tools, expenses, watch items, tasks, ideas).
-   - **Clean start (your real car):** `npm run db:fresh`. That's an empty database with just your user, so you land in onboarding.
+2. Your data: the local database holds your real build. It's never reset by updates; new migrations go in with `npm run db:migrate`, which backs up first. Back up any time with `npm run db:backup`.
 3. `npm run dev:lan`, and open the printed `http://<your-mac-ip>:3000` on **both** your phone and the Mac (same Wi-Fi). You're signed in automatically.
    - First run: if macOS asks whether to allow incoming connections for `node`, choose **Allow**.
    - Plain `npm run dev` (localhost) still works for Mac-only testing.

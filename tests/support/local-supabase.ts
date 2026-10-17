@@ -77,7 +77,9 @@ export async function createTestUser(label: string): Promise<TestUser> {
 }
 
 /** Deletes a test user; owner_id cascades remove their rows. Storage objects are removed first. */
-export async function deleteTestUser(user: TestUser): Promise<void> {
+export async function deleteTestUser(
+  user: Pick<TestUser, "id">,
+): Promise<void> {
   const admin = adminClient();
   const { data: folders } = await admin.storage
     .from("attachments")

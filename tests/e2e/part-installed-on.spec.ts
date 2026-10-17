@@ -48,6 +48,28 @@ test("Installed on: entered on the form, defaulted to today, shown on the part a
         ).data!.installed_on,
     )
     .toBe(todayIso());
+  // ...and the date can be changed right there.
+  const installedOn = page
+    .getByRole("region", { name: "Status and actions" })
+    .getByLabel("Installed on");
+  await expect(installedOn).toHaveValue(todayIso());
+  await installedOn.fill("2026-09-20");
+  await expect
+    .poll(
+      async () =>
+        (
+          await adminClient()
+            .from("parts")
+            .select("installed_on")
+            .eq("id", partId)
+            .single()
+        ).data!.installed_on,
+    )
+    .toBe("2026-09-20");
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Details" })).toContainText(
+    "Sep 20, 2026",
+  );
 
   await page.goto("/parts");
   const row = page

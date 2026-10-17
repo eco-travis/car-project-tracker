@@ -1,6 +1,6 @@
 import { test as base, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
-import { adminClient } from "../support/local-supabase";
+import { adminClient, deleteTestUser } from "../support/local-supabase";
 import { seedPhaseNames } from "@/lib/domain/phases";
 
 export type E2EUser = {
@@ -112,11 +112,11 @@ export const test = base.extend<{ user: E2EUser }>({
       "Uncaught errors, hydration mismatches, or duplicate keys in the browser",
     ).toEqual([]);
   },
-  // A fresh, isolated user per test; deleted afterwards (rows cascade).
+  // A fresh, isolated user per test; deleted afterwards (rows cascade; stored files removed).
   user: async ({}, provide) => {
     const user = await createE2EUser();
     await provide(user);
-    await adminClient().auth.admin.deleteUser(user.id);
+    await deleteTestUser(user);
   },
 });
 

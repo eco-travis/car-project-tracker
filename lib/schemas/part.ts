@@ -63,3 +63,8 @@ export type PartInput = z.output<typeof newPartSchema>;
 
 /** Rule 8: any status can be set by hand. */
 export const partStatusSchema = z.object({ status: z.enum(PART_STATUSES) });
+
+/** Change just the install date (part page). Required: clearing it isn't offered there. */
+export const partInstalledOnSchema = z.object({
+  installed_on: z.iso.date("Pick a date."),
+});
