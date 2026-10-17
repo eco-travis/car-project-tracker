@@ -102,3 +102,29 @@ test("vehicle page saves notes and lets the odometer be corrected down", async (
     "141900",
   );
 });
+
+test("vehicle page records sales tax and licensing, counted in Total invested", async ({
+  page,
+  user,
+}) => {
+  await user.createVehicle("Purchase costs");
+  await user.signIn(page);
+  await page.goto("/vehicle");
+  await page.getByLabel("Purchase price ($)").fill("12,500");
+  await page.getByLabel("Sales tax ($)").fill("1,125.00");
+  await page.getByLabel("Licensing and registration ($)").fill("418");
+  await page.getByRole("button", { name: "Save vehicle" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Saved." }),
+  ).toBeVisible();
+
+  const money = page.getByRole("region", { name: "Money" });
+  await expect(money).toContainText("Total invested$14,043.00");
+  await expect(money).toContainText("Sales tax$1,125.00");
+  await expect(money).toContainText("Licensing and registration$418.00");
+  await page.reload();
+  await expect(page.getByLabel("Sales tax ($)")).toHaveValue("1125.00");
+
+  await page.goto("/dashboard");
+  await expect(page.getByText("$14,043.00").first()).toBeVisible();
+});

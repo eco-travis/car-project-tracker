@@ -357,3 +357,12 @@ Travis: "for parts cost entry should be mandatory and i should be able to edit l
 - **Applied locally with `npm run db:migrate`** (backed up first). Travis's 4 parts kept their costs, all linked.
 - **Part category "Trim" (2026-10-16):** added at Travis's request, after Interior (migration `20261016000003_part_category_trim.sql` extends the `part_category` enum). Applied locally with `db:migrate`.
 - **Part category "Brakes" (2026-10-16):** added after Suspension (migration `20261016000004_part_category_brakes.sql`). Applied locally with `db:migrate`.
+
+## Vehicle sales tax and licensing (2026-10-17)
+
+Travis asked where to enter sales tax and licensing on the Vehicle tab. There was no place for them.
+
+- **New columns** `vehicles.purchase_tax_cents` and `purchase_fees_cents` (migration `20261017000001_vehicle_purchase_tax_fees.sql`). They're edited on the Vehicle page next to Purchase price, as "Sales tax" and "Licensing and registration".
+- **Total invested** = purchase price + sales tax + licensing + everything paid (spec rule 5's "purchase price", extended). `purchaseCost()` in `lib/domain/costs.ts` feeds `vehicleTotals`, and `v_vehicle_totals` was recreated to match. The DB test checks the view against the domain function. The Money section lists each part of the purchase.
+- **Later renewals** (annual registration) are ownership running costs. They go in as expenses in the Shipping/tax/fees category, as the field's hint says, so they aren't counted as part of the purchase.
+- Applied locally with `db:migrate`.

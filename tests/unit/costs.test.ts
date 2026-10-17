@@ -6,6 +6,7 @@ import {
   expenseBucket,
   formatHours,
   totalDiyHours,
+  purchaseCost,
   vehicleTotals,
   type AttributableExpense,
   type JobRef,
@@ -100,6 +101,25 @@ describe("expenseBucket (rule 11)", () => {
   it("counts phase-only expenses as build and anything else as unassigned", () => {
     expect(expenseBucket(exp({ phase_id: "ph" }), undefined)).toBe("build");
     expect(expenseBucket(exp(), undefined)).toBe("unassigned");
+  });
+});
+
+describe("purchaseCost", () => {
+  it("adds price, sales tax, and licensing; unset counts as zero", () => {
+    expect(
+      purchaseCost({
+        purchase_price_cents: 1250000,
+        purchase_tax_cents: 112500,
+        purchase_fees_cents: 41800,
+      }),
+    ).toBe(1404300);
+    expect(
+      purchaseCost({
+        purchase_price_cents: null,
+        purchase_tax_cents: null,
+        purchase_fees_cents: 41800,
+      }),
+    ).toBe(41800);
   });
 });
 

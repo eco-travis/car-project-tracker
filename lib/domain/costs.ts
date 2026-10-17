@@ -89,9 +89,22 @@ export type VehicleTotals = Record<Bucket, number> & {
   totalInvested: number;
 };
 
-/** Rule 11: buckets of paid money, plus committed, and total invested = purchase price + all paid. */
+/** What acquiring the vehicle cost: price + sales tax + licensing and registration at purchase. */
+export function purchaseCost(v: {
+  purchase_price_cents: number | null;
+  purchase_tax_cents: number | null;
+  purchase_fees_cents: number | null;
+}): number {
+  return (
+    (v.purchase_price_cents ?? 0) +
+    (v.purchase_tax_cents ?? 0) +
+    (v.purchase_fees_cents ?? 0)
+  );
+}
+
+/** Rule 11: buckets of paid money, plus committed, and total invested = purchase cost + all paid. */
 export function vehicleTotals(
-  purchasePriceCents: number | null,
+  purchaseCostCents: number | null,
   expenses: (AttributableExpense & { state: ExpenseState })[],
   jobs: Map<string, JobRef>,
   parts: Map<string, PartRef>,
@@ -116,7 +129,7 @@ export function vehicleTotals(
       e.amount_cents;
     totals.paid += e.amount_cents;
   }
-  totals.totalInvested = (purchasePriceCents ?? 0) + totals.paid;
+  totals.totalInvested = (purchaseCostCents ?? 0) + totals.paid;
   return totals;
 }
 

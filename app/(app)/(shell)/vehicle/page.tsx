@@ -41,7 +41,14 @@ export default async function VehiclePage() {
         <h2 id="money-heading" className="mb-3 font-semibold">
           Money
         </h2>
-        <VehicleTotals totals={totals} purchasePrice={v.purchase_price_cents} />
+        <VehicleTotals
+          totals={totals}
+          purchase={{
+            price: v.purchase_price_cents,
+            tax: v.purchase_tax_cents,
+            fees: v.purchase_fees_cents,
+          }}
+        />
       </section>
       <section
         aria-labelledby="odometer-heading"
@@ -68,6 +75,8 @@ export default async function VehiclePage() {
             vin: v.vin ?? "",
             purchase_date: v.purchase_date ?? "",
             purchase_price_cents: centsToInput(v.purchase_price_cents),
+            purchase_tax_cents: centsToInput(v.purchase_tax_cents),
+            purchase_fees_cents: centsToInput(v.purchase_fees_cents),
             notes: v.notes ?? "",
           }}
         />

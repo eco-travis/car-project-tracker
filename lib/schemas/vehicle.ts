@@ -23,7 +23,11 @@ export const vehicleSchema = z.object({
 /** Vehicle page edits. The odometer has its own form. */
 export const vehicleUpdateSchema = vehicleSchema
   .omit({ current_odometer: true })
-  .extend({ notes: optionalText });
+  .extend({
+    purchase_tax_cents: optionalMoney("Sales tax"),
+    purchase_fees_cents: optionalMoney("Licensing and registration"),
+    notes: optionalText,
+  });
 
 export type VehicleUpdateFormValues = z.input<typeof vehicleUpdateSchema>;
 export type VehicleUpdateInput = z.output<typeof vehicleUpdateSchema>;

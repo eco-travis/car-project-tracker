@@ -89,6 +89,21 @@ export function VehicleForm({
         error={errors.purchase_price_cents?.message}
         {...register("purchase_price_cents")}
       />
+      <TextField
+        id="v-purchase-tax"
+        label="Sales tax ($)"
+        inputMode="decimal"
+        error={errors.purchase_tax_cents?.message}
+        {...register("purchase_tax_cents")}
+      />
+      <TextField
+        id="v-purchase-fees"
+        label="Licensing and registration ($)"
+        inputMode="decimal"
+        hint="Paid when you bought it. Later renewals: add an expense (Shipping/tax/fees)."
+        error={errors.purchase_fees_cents?.message}
+        {...register("purchase_fees_cents")}
+      />
       <TextareaField
         id="v-notes"
         label="Notes"

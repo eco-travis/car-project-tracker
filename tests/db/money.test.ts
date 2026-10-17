@@ -4,6 +4,7 @@ import {
   effectiveJobId,
   effectivePhaseId,
   expenseBucket,
+  purchaseCost,
   vehicleTotals,
   type JobRef,
   type PartRef,
@@ -240,7 +241,20 @@ describe("v_phase_costs (rules 9, 10, 13)", () => {
 describe("v_vehicle_totals (rule 11)", () => {
   it("matches vehicleTotals and the known fixture values", async () => {
     const { expenses, jobs, parts } = await domainInputs();
-    const t = vehicleTotals(1250000, expenses, jobs, parts);
+    await user.client
+      .from("vehicles")
+      .update({ purchase_tax_cents: 112500, purchase_fees_cents: 41800 })
+      .eq("id", vehicleId);
+    const t = vehicleTotals(
+      purchaseCost({
+        purchase_price_cents: 1250000,
+        purchase_tax_cents: 112500,
+        purchase_fees_cents: 41800,
+      }),
+      expenses,
+      jobs,
+      parts,
+    );
     const { data: row } = await user.client
       .from("v_vehicle_totals")
       .select("*")
@@ -266,7 +280,7 @@ describe("v_vehicle_totals (rule 11)", () => {
       unassigned: 700,
       committed: 14500,
     });
-    expect(t.totalInvested).toBe(1250000 + 107200);
+    expect(t.totalInvested).toBe(1250000 + 112500 + 41800 + 107200);
   });
 });
 

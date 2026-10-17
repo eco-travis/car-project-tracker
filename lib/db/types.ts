@@ -683,14 +683,14 @@ isOneToOne: false
                   ]
                 },"vehicles": {
                   Row: {
-                    "created_at": string,"current_odometer": number,"generation": string | null,"id": string,"model": string | null,"name": string,"notes": string | null,"owner_id": string,"purchase_date": string | null,"purchase_price_cents": number | null,"updated_at": string,"vin": string | null,"year": number | null
+                    "created_at": string,"current_odometer": number,"generation": string | null,"id": string,"model": string | null,"name": string,"notes": string | null,"owner_id": string,"purchase_date": string | null,"purchase_fees_cents": number | null,"purchase_price_cents": number | null,"purchase_tax_cents": number | null,"updated_at": string,"vin": string | null,"year": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"current_odometer"?: number,"generation"?: string | null,"id"?: string,"model"?: string | null,"name": string,"notes"?: string | null,"owner_id"?: string,"purchase_date"?: string | null,"purchase_price_cents"?: number | null,"updated_at"?: string,"vin"?: string | null,"year"?: number | null
+                    "created_at"?: string,"current_odometer"?: number,"generation"?: string | null,"id"?: string,"model"?: string | null,"name": string,"notes"?: string | null,"owner_id"?: string,"purchase_date"?: string | null,"purchase_fees_cents"?: number | null,"purchase_price_cents"?: number | null,"purchase_tax_cents"?: number | null,"updated_at"?: string,"vin"?: string | null,"year"?: number | null
                   }
                   Update: {
-                    "created_at"?: string,"current_odometer"?: number,"generation"?: string | null,"id"?: string,"model"?: string | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"purchase_date"?: string | null,"purchase_price_cents"?: number | null,"updated_at"?: string,"vin"?: string | null,"year"?: number | null
+                    "created_at"?: string,"current_odometer"?: number,"generation"?: string | null,"id"?: string,"model"?: string | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"purchase_date"?: string | null,"purchase_fees_cents"?: number | null,"purchase_price_cents"?: number | null,"purchase_tax_cents"?: number | null,"updated_at"?: string,"vin"?: string | null,"year"?: number | null
                   }
                   Relationships: [
                     

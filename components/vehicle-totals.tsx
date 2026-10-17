@@ -17,17 +17,20 @@ export type Totals = {
 /** Spec cost rules 4 and 5: headline numbers, build with or without tools, recovered as its own line. */
 export function VehicleTotals({
   totals,
-  purchasePrice,
+  purchase,
 }: {
   totals: Totals;
-  purchasePrice: number | null;
+  /** Acquisition costs; any may be unset. */
+  purchase: { price: number | null; tax: number | null; fees: number | null };
 }) {
+  const hasPurchase =
+    purchase.price !== null || purchase.tax !== null || purchase.fees !== null;
   const headline = [
     {
       label: "Total invested",
       value: totals.totalInvested,
-      hint: purchasePrice
-        ? "Purchase price + everything paid"
+      hint: hasPurchase
+        ? "Purchase (price, tax, licensing) + everything paid"
         : "Everything paid",
     },
     { label: "Build cost", value: totals.build, hint: `With tools: ` },
@@ -77,10 +80,19 @@ export function VehicleTotals({
           label="Committed (not yet paid)"
           value={<Money cents={totals.committed} />}
         />
-        {purchasePrice !== null && (
+        {purchase.price !== null && (
           <Line
             label="Purchase price"
-            value={<Money cents={purchasePrice} />}
+            value={<Money cents={purchase.price} />}
+          />
+        )}
+        {purchase.tax !== null && (
+          <Line label="Sales tax" value={<Money cents={purchase.tax} />} />
+        )}
+        {purchase.fees !== null && (
+          <Line
+            label="Licensing and registration"
+            value={<Money cents={purchase.fees} />}
           />
         )}
         <Line label="DIY labor" value={formatHours(totals.diyHours)} />
