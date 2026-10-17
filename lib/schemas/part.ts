@@ -23,6 +23,7 @@ export const PART_STATUSES = [
 ] as const;
 export const PART_CATEGORIES = [
   "suspension",
+  "brakes",
   "armor",
   "lighting",
   "recovery",

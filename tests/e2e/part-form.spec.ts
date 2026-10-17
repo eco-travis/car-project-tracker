@@ -42,9 +42,7 @@ test("Add part is simplified and can attach a receipt or invoice", async ({
   }
 
   await dialog.getByLabel("Name", { exact: true }).fill("Front control arms");
-  await dialog
-    .getByLabel("Category", { exact: true })
-    .selectOption("suspension");
+  await dialog.getByLabel("Category", { exact: true }).selectOption("Brakes");
   await dialog.getByLabel("Status", { exact: true }).selectOption("ordered");
   await dialog.getByLabel("Cost", { exact: true }).fill("389.00");
   await dialog

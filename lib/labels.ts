@@ -57,6 +57,7 @@ export const PART_STATUS_LABELS = {
 
 export const PART_CATEGORY_LABELS = {
   suspension: "Suspension",
+  brakes: "Brakes",
   armor: "Armor",
   lighting: "Lighting",
   recovery: "Recovery",
