@@ -250,6 +250,7 @@ test("an idea part needs no cost; marking it bought later asks for one in Edit",
   await page.getByRole("button", { name: "Add part" }).click();
   const dialog = page.getByRole("dialog", { name: "Add part" });
   await dialog.getByLabel("Name", { exact: true }).fill("Recovery boards");
+  await dialog.getByLabel("Category", { exact: true }).selectOption("Trim");
   await dialog.getByRole("button", { name: "Add part" }).click();
   await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);
   const partId = page.url().split("/").pop()!;
@@ -273,5 +274,11 @@ test("an idea part needs no cost; marking it bought later asks for one in Edit",
     .eq("id", partId)
     .single();
   expect(data!.status).toBe("received");
+  const { data: cat } = await admin
+    .from("parts")
+    .select("category")
+    .eq("id", partId)
+    .single();
+  expect(cat!.category).toBe("trim");
   expect(data!.purchase_expense_id).not.toBeNull();
 });

@@ -29,6 +29,7 @@ export const PART_CATEGORIES = [
   "electrical",
   "tires_wheels",
   "interior",
+  "trim",
   "fluids",
   "other",
 ] as const;

@@ -63,6 +63,7 @@ export const PART_CATEGORY_LABELS = {
   electrical: "Electrical",
   tires_wheels: "Tires/wheels",
   interior: "Interior",
+  trim: "Trim",
   fluids: "Fluids",
   other: "Other",
 } as const;

@@ -355,3 +355,4 @@ Travis: "for parts cost entry should be mandatory and i should be able to edit l
 - **Extra costs** such as shipping or a second payment remain separate expenses from the part page. The part's total is still the sum of its expenses.
 - **PostgREST:** the second foreign key between `expenses` and `parts` made `part:parts(...)` ambiguous from expenses. `EXPENSE_SELECT` now names `parts!expenses_part_id_fkey`.
 - **Applied locally with `npm run db:migrate`** (backed up first). Travis's 4 parts kept their costs, all linked.
+- **Part category "Trim" (2026-10-16):** added at Travis's request, after Interior (migration `20261016000003_part_category_trim.sql` extends the `part_category` enum). Applied locally with `db:migrate`.
