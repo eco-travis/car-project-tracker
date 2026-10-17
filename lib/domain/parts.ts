@@ -49,3 +49,25 @@ export function installedOnFor(
   if (installedOn) return installedOn;
   return status === "installed" ? fallback : null;
 }
+
+/** Statuses that mean the part was bought, so Add/Edit part require its cost (Travis, 2026-10-16). */
+export const COST_REQUIRED_STATUSES: readonly PartStatus[] = [
+  "ordered",
+  "received",
+  "installed",
+];
+
+/**
+ * A part's cost is required once it's bought, or once it already has a recorded cost (which Edit
+ * part changes). Planning-stage parts (and removed stock parts) don't need one.
+ */
+export function partCostError(
+  status: PartStatus,
+  costCents: number | null,
+  hasRecordedCost = false,
+): string | null {
+  const required = COST_REQUIRED_STATUSES.includes(status) || hasRecordedCost;
+  if (!required) return null;
+  if (costCents === null || costCents <= 0) return "Enter what it cost.";
+  return null;
+}

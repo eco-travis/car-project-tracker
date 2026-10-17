@@ -2,7 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/db/server";
 
 export const EXPENSE_SELECT =
-  "id, spent_on, amount_cents, category, state, vendor, notes, job_id, phase_id, part_id, tool_id, job:jobs(id, title), phase:phases(id, name), part:parts(id, name), tool:tools(id, name)";
+  "id, spent_on, amount_cents, category, state, vendor, notes, job_id, phase_id, part_id, tool_id, job:jobs(id, title), phase:phases(id, name), part:parts!expenses_part_id_fkey(id, name), tool:tools(id, name)";
 
 export type ExpenseFilter = {
   job_id?: string;

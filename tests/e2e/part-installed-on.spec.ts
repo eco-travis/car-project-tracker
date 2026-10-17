@@ -15,6 +15,7 @@ test("Installed on: entered on the form, defaulted to today, shown on the part a
   await expect(dialog.getByLabel("Installed on")).toHaveCount(0); // only for Installed parts
   await dialog.getByLabel("Name", { exact: true }).fill("Skid plate");
   await dialog.getByLabel("Status", { exact: true }).selectOption("installed");
+  await dialog.getByLabel("Cost", { exact: true }).fill("540");
   await dialog.getByLabel("Installed on").fill("2026-09-28");
   await dialog.getByRole("button", { name: "Add part" }).click();
   await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);

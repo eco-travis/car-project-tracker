@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { partCostError } from "@/lib/domain/parts";
 import {
   optionalDate,
   optionalId,
@@ -53,10 +54,17 @@ export const partSchema = z.object({
   notes: optionalText,
 });
 
-/** Add part can also record what it cost: a paid "part" expense dated today, linked to it. */
-export const newPartSchema = partSchema.extend({
-  cost_cents: optionalMoney("Cost"),
-});
+/**
+ * Add and Edit part, with the part's cost (its purchase expense). Required once the part is bought
+ * (`partCostError`); the server also requires it when a cost is already recorded.
+ */
+export const newPartSchema = partSchema
+  .extend({ cost_cents: optionalMoney("Cost") })
+  .superRefine((p, ctx) => {
+    const message = partCostError(p.status, p.cost_cents);
+    if (message)
+      ctx.addIssue({ code: "custom", path: ["cost_cents"], message });
+  });
 
 export type PartFormValues = z.input<typeof newPartSchema>;
 export type PartInput = z.output<typeof newPartSchema>;

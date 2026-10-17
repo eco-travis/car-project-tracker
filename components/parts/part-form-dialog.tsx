@@ -21,6 +21,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { createPart, updatePart } from "@/lib/actions/parts";
+import { COST_REQUIRED_STATUSES } from "@/lib/domain/parts";
+import { centsToInput } from "@/lib/format";
 import type { Option } from "@/lib/db/queries/options";
 import type { Database } from "@/lib/db/types";
 import {
@@ -41,13 +43,14 @@ type Part = Database["public"]["Tables"]["parts"]["Row"];
 const RECEIPT_TYPES = "image/*,application/pdf";
 
 /**
- * Add part: name, category, status, quantity, OEM number, web link, vendor, notes, and an optional
- * receipt or invoice.
+ * Add part: name, category, status, quantity, cost (required once bought), OEM number, web link,
+ * vendor, notes, and an optional receipt or invoice.
  * Edit part: the same essentials, with the rest of the spec's part fields under "More details"
  * (kept so existing data stays editable). A job is still linked when adding from a job's page.
  */
 export function PartFormDialog({
   part,
+  purchaseCents = null,
   jobs,
   parts,
   defaultJobId,
@@ -55,6 +58,8 @@ export function PartFormDialog({
   trigger,
 }: {
   part?: Part;
+  /** The part's recorded cost (its purchase expense), editable here. */
+  purchaseCents?: number | null;
   jobs: Option[];
   parts: Option[];
   defaultJobId?: string;
@@ -85,7 +90,7 @@ export function PartFormDialog({
     quantity: String(part?.quantity ?? 1),
     notes: part?.notes ?? "",
     installed_on: part?.installed_on ?? "",
-    cost_cents: "",
+    cost_cents: centsToInput(purchaseCents),
   };
   const {
     register,
@@ -211,13 +216,18 @@ export function PartFormDialog({
             error={errors.quantity?.message}
             {...register("quantity")}
           />
-          {!part && (
+          {(COST_REQUIRED_STATUSES.includes(status) ||
+            purchaseCents !== null) && (
             <TextField
               id="part-cost"
-              label="Cost (optional)"
+              label="Cost"
               inputMode="decimal"
               placeholder="0.00"
-              hint="Adds a paid expense dated today."
+              hint={
+                purchaseCents !== null
+                  ? "What you paid. Changes its purchase expense."
+                  : "What you paid. Saved as a paid expense dated today."
+              }
               error={errors.cost_cents?.message}
               {...register("cost_cents")}
             />

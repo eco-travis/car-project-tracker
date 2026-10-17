@@ -84,6 +84,10 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
         <div className="flex gap-1">
           <PartFormDialog
             part={part}
+            purchaseCents={
+              data.expenses.find((e) => e.id === part.purchase_expense_id)
+                ?.amount_cents ?? null
+            }
             jobs={links.jobs}
             parts={links.parts}
             trigger={<Button variant="outline">Edit</Button>}

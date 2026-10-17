@@ -46,6 +46,7 @@ test("Add part is simplified and can attach a receipt or invoice", async ({
     .getByLabel("Category", { exact: true })
     .selectOption("suspension");
   await dialog.getByLabel("Status", { exact: true }).selectOption("ordered");
+  await dialog.getByLabel("Cost", { exact: true }).fill("389.00");
   await dialog
     .getByLabel("Web link", { exact: true })
     .fill("https://www.fcpeuro.com/meyle-hd");
@@ -173,7 +174,7 @@ test("part page uploads a receipt or invoice", async ({ page, user }) => {
   ).toBeVisible();
 });
 
-test("Add part with a cost records a paid expense linked to the part", async ({
+test("a bought part requires its cost, recorded as a paid expense and editable later", async ({
   page,
   user,
 }) => {
@@ -183,27 +184,31 @@ test("Add part with a cost records a paid expense linked to the part", async ({
   await page.getByRole("button", { name: "Add part" }).click();
   const dialog = page.getByRole("dialog", { name: "Add part" });
   await dialog.getByLabel("Name", { exact: true }).fill("Skid plate");
-  await dialog.getByLabel("Cost (optional)").fill("abc");
+  // Not shown while it's only an idea.
+  await expect(dialog.getByLabel("Cost", { exact: true })).toHaveCount(0);
+  await dialog.getByLabel("Status", { exact: true }).selectOption("ordered");
+  await dialog.getByRole("button", { name: "Add part" }).click();
+  await expect(dialog.getByText("Enter what it cost.")).toBeVisible();
+  await dialog.getByLabel("Cost", { exact: true }).fill("abc");
   await dialog.getByRole("button", { name: "Add part" }).click();
   await expect(
     dialog.getByText("Cost must be a dollar amount like 1,234.56."),
   ).toBeVisible();
-  await dialog.getByLabel("Cost (optional)").fill("1,249.99");
+  await dialog.getByLabel("Cost", { exact: true }).fill("1,249.99");
   await dialog.getByLabel("Vendor", { exact: true }).fill("Rennline");
   await dialog.getByRole("button", { name: "Add part" }).click();
 
   await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);
   const partId = page.url().split("/").pop()!;
-  await expect(page.getByRole("region", { name: "Expenses" })).toContainText(
-    "$1,249.99",
-  );
+  const expenses = page.getByRole("region", { name: "Expenses" });
+  await expect(expenses).toContainText("$1,249.99");
   const admin = adminClient();
   const { data: expense } = await admin
     .from("expenses")
-    .select("amount_cents, category, state, vendor")
+    .select("id, amount_cents, category, state, vendor")
     .eq("part_id", partId)
     .single();
-  expect(expense).toEqual({
+  expect(expense).toMatchObject({
     amount_cents: 124999,
     category: "part",
     state: "paid",
@@ -211,13 +216,34 @@ test("Add part with a cost records a paid expense linked to the part", async ({
   });
   const { data: part } = await admin
     .from("parts")
-    .select("status")
+    .select("status, purchase_expense_id")
     .eq("id", partId)
     .single();
-  expect(part!.status).toBe("ordered"); // rule: an expense on a planning-stage part marks it Ordered
+  expect(part).toEqual({ status: "ordered", purchase_expense_id: expense!.id });
+
+  // Edit later: the cost is pre-filled, required, and changes the same expense.
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  const edit = page.getByRole("dialog", { name: "Edit part" });
+  const cost = edit.getByLabel("Cost", { exact: true });
+  await expect(cost).toHaveValue("1249.99");
+  await cost.fill("");
+  await edit.getByRole("button", { name: "Save part" }).click();
+  await expect(edit.getByText("Enter what it cost.")).toBeVisible();
+  await cost.fill("1,199.00");
+  await edit.getByRole("button", { name: "Save part" }).click();
+  await expect(edit).toBeHidden();
+  await expect(expenses).toContainText("$1,199.00");
+  const { data: after } = await admin
+    .from("expenses")
+    .select("id, amount_cents")
+    .eq("part_id", partId);
+  expect(after).toEqual([{ id: expense!.id, amount_cents: 119900 }]);
 });
 
-test("Add part without a cost creates no expense", async ({ page, user }) => {
+test("an idea part needs no cost; marking it bought later asks for one in Edit", async ({
+  page,
+  user,
+}) => {
   await user.createVehicle("Part no cost");
   await user.signIn(page);
   await page.goto("/parts");
@@ -226,15 +252,26 @@ test("Add part without a cost creates no expense", async ({ page, user }) => {
   await dialog.getByLabel("Name", { exact: true }).fill("Recovery boards");
   await dialog.getByRole("button", { name: "Add part" }).click();
   await expect(page).toHaveURL(/\/parts\/[0-9a-f-]{36}$/);
-  const { count } = await adminClient()
+  const partId = page.url().split("/").pop()!;
+  const admin = adminClient();
+  const { count } = await admin
     .from("expenses")
     .select("*", { count: "exact", head: true })
     .eq("owner_id", user.id);
   expect(count).toBe(0);
+
   await page.getByRole("button", { name: "Edit", exact: true }).click();
-  await expect(
-    page
-      .getByRole("dialog", { name: "Edit part" })
-      .getByLabel("Cost (optional)"),
-  ).toHaveCount(0);
+  const edit = page.getByRole("dialog", { name: "Edit part" });
+  await expect(edit.getByLabel("Cost", { exact: true })).toHaveCount(0);
+  await edit.getByLabel("Status", { exact: true }).selectOption("received");
+  await edit.getByLabel("Cost", { exact: true }).fill("249");
+  await edit.getByRole("button", { name: "Save part" }).click();
+  await expect(edit).toBeHidden();
+  const { data } = await admin
+    .from("parts")
+    .select("status, purchase_expense_id")
+    .eq("id", partId)
+    .single();
+  expect(data!.status).toBe("received");
+  expect(data!.purchase_expense_id).not.toBeNull();
 });

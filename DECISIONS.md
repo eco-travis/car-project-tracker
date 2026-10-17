@@ -345,3 +345,13 @@ Travis is entering his actual build locally. Twice, after the tools and install-
 - **Test cleanup:** the e2e user fixture now deletes a test user's stored files as well as the user. About 3,750 orphaned test files were purged.
 - **`CLAUDE.md`** now says local data is real and lists the commands never to run without Travis's go-ahead.
 - **Install date editable in place (2026-10-16):** the part page shows an "Installed on" date input beside the status dropdown for Installed parts (or any part with a date). It saves on change through `setPartInstalledOn`. Setting the status to Installed still dates the part today, and the field re-keys to show that date. Edit part keeps its own Installed on field.
+
+## Part cost required once bought, editable later (2026-10-16)
+
+Travis: "for parts cost entry should be mandatory and i should be able to edit later." He chose: required once bought.
+
+- **Rule** (`partCostError`, `COST_REQUIRED_STATUSES` in `lib/domain/parts.ts`, unit-tested): Cost is required, and must be more than $0, when the status is Ordered, Received, or Installed, or when the part already has a recorded cost. Idea, Researching, and Wishlist parts don't ask for it (a cost is money spent, and the ledger trigger would mark them Ordered), and neither do removed stock parts.
+- **Recorded cost = the part's purchase expense.** New column `parts.purchase_expense_id` (migration `20261016000002_part_purchase_expense.sql`, `on delete set null`, backfilled with each part's earliest positive part expense). Add part creates that paid expense, dated today, with the part's vendor. **Edit part** shows Cost pre-filled and changes that expense's amount. If there's no purchase expense yet (an idea that became bought), it records one.
+- **Extra costs** such as shipping or a second payment remain separate expenses from the part page. The part's total is still the sum of its expenses.
+- **PostgREST:** the second foreign key between `expenses` and `parts` made `part:parts(...)` ambiguous from expenses. `EXPENSE_SELECT` now names `parts!expenses_part_id_fkey`.
+- **Applied locally with `npm run db:migrate`** (backed up first). Travis's 4 parts kept their costs, all linked.

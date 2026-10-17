@@ -6,13 +6,13 @@ import { createClient } from "@/lib/db/server";
 import { todayIso } from "@/lib/domain/dates";
 import {
   installedOnFor,
+  partCostError,
   recordSaleError,
   saleExpense,
 } from "@/lib/domain/parts";
 import {
   newPartSchema,
   partInstalledOnSchema,
-  partSchema,
   partStatusSchema,
 } from "@/lib/schemas/part";
 import { saleSchema } from "@/lib/schemas/expense";
@@ -58,16 +58,26 @@ export async function createPart(
   if (cost_cents !== null) {
     // The ledger is where money lives (the part's cost is the sum of its expenses). Its insert
     // trigger moves a planning-stage part to Ordered, as adding an expense does anywhere.
-    const { error: expenseError } = await supabase.from("expenses").insert({
-      vehicle_id: vehicle.id,
-      part_id: data.id,
-      spent_on: todayIso(),
-      amount_cents: cost_cents,
-      category: "part",
-      state: "paid",
-      vendor: fields.vendor,
-    });
-    if (expenseError) {
+    const { data: expense, error: expenseError } = await supabase
+      .from("expenses")
+      .insert({
+        vehicle_id: vehicle.id,
+        part_id: data.id,
+        spent_on: todayIso(),
+        amount_cents: cost_cents,
+        category: "part",
+        state: "paid",
+        vendor: fields.vendor,
+      })
+      .select("id")
+      .single();
+    const { error: linkError } = expense
+      ? await supabase
+          .from("parts")
+          .update({ purchase_expense_id: expense.id })
+          .eq("id", data.id)
+      : { error: null };
+    if (expenseError || linkError) {
       await supabase.from("parts").delete().eq("id", data.id);
       return fail("Couldn't save the cost, so the part wasn't added.");
     }
@@ -82,7 +92,7 @@ export async function updatePart(
 ): Promise<ActionResult> {
   const vehicle = await requireVehicle();
   const partId = z.uuid().safeParse(id);
-  const parsed = partSchema.safeParse(input);
+  const parsed = newPartSchema.safeParse(input);
   if (!partId.success) return fail("Part not found.");
   if (!parsed.success) return invalid(parsed.error);
   if (parsed.data.replaces_part_id === partId.data) {
@@ -102,20 +112,63 @@ export async function updatePart(
       ],
     });
 
-  const { data, error } = await supabase
+  const { data: current } = await supabase
+    .from("parts")
+    .select("purchase_expense_id")
+    .eq("id", partId.data)
+    .maybeSingle();
+  if (!current) return fail("Part not found.");
+  const { cost_cents, ...fields } = parsed.data;
+  const costError = partCostError(
+    fields.status,
+    cost_cents,
+    current.purchase_expense_id !== null,
+  );
+  if (costError) return fail(costError, { cost_cents: [costError] });
+
+  const { error } = await supabase
     .from("parts")
     .update({
-      ...parsed.data,
+      ...fields,
       installed_on: installedOnFor(
-        parsed.data.status,
-        parsed.data.installed_on,
+        fields.status,
+        fields.installed_on,
         todayIso(),
       ),
     })
-    .eq("id", partId.data)
-    .select("id");
+    .eq("id", partId.data);
   if (error) return fail("Couldn't save the part.");
-  if (!data.length) return fail("Part not found.");
+  if (cost_cents !== null) {
+    // Change the purchase expense, or record one if the part has none yet.
+    if (current.purchase_expense_id) {
+      const { error: costUpdateError } = await supabase
+        .from("expenses")
+        .update({ amount_cents: cost_cents })
+        .eq("id", current.purchase_expense_id);
+      if (costUpdateError)
+        return fail("Saved the part, but couldn't change its cost.");
+    } else {
+      const { data: expense, error: expenseError } = await supabase
+        .from("expenses")
+        .insert({
+          vehicle_id: vehicle.id,
+          part_id: partId.data,
+          spent_on: todayIso(),
+          amount_cents: cost_cents,
+          category: "part",
+          state: "paid",
+          vendor: fields.vendor,
+        })
+        .select("id")
+        .single();
+      if (expenseError)
+        return fail("Saved the part, but couldn't record its cost.");
+      await supabase
+        .from("parts")
+        .update({ purchase_expense_id: expense.id })
+        .eq("id", partId.data);
+    }
+  }
   refreshApp();
   return ok();
 }

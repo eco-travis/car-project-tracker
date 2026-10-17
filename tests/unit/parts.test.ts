@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   installedOnFor,
+  partCostError,
   partStatusAfterExpense,
   partsNotOrdered,
   recordSaleError,
@@ -80,5 +81,31 @@ describe("installedOnFor", () => {
   });
   it("leaves other statuses undated", () => {
     expect(installedOnFor("received", null, "2026-10-16")).toBeNull();
+  });
+});
+
+describe("partCostError", () => {
+  it("requires a cost once the part is bought", () => {
+    for (const s of ["ordered", "received", "installed"] as const) {
+      expect(partCostError(s, null)).toBe("Enter what it cost.");
+      expect(partCostError(s, 0)).toBe("Enter what it cost.");
+      expect(partCostError(s, 4999)).toBeNull();
+    }
+  });
+  it("doesn't require one for planning-stage or removed parts", () => {
+    for (const s of [
+      "idea",
+      "researching",
+      "wishlist",
+      "removed",
+      "sold",
+      "returned",
+    ] as const) {
+      expect(partCostError(s, null)).toBeNull();
+    }
+  });
+  it("keeps requiring it once a cost is recorded", () => {
+    expect(partCostError("idea", null, true)).toBe("Enter what it cost.");
+    expect(partCostError("idea", 1200, true)).toBeNull();
   });
 });
