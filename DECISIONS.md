@@ -317,3 +317,16 @@ Travis: "in tools we need to track if they were purchased for the project. cost 
 - **Storage location** is gone from the form, the Tools table, and the job's Tools panel. The column stays, so older data isn't lost and still appears in the full-data export.
 - **Production:** this migration needs `supabase db push`, which runs only with Travis's approval at deploy time.
 - **Tests:** `tests/e2e/tools.spec.ts`. The demo seed sets the flag on every row: bulk inserts send the union of keys.
+
+## Part install date (2026-10-16)
+
+Travis: "i need to be able to track when i installed something." The spec has no install date on Part, so this adds one.
+
+- **New column `parts.installed_on`** (migration `20261016000001_part_installed_on.sql`). It's backfilled for installed parts from their done job's `completed_on`; other installed parts stay undated until edited.
+- **Form:** an "Installed on" date appears on Add and Edit part when the status is Installed (or a date is already set). Left blank, it's saved as today (`installedOnFor` in `lib/domain/parts.ts`, with unit tests).
+- **Automatic dates:**
+  - Setting Installed with the part page's status control dates it today, unless it already has a date.
+  - Mark done's "Mark installed" offer dates the parts with the **job's completion date**, not the day the offer was accepted.
+- **Shown** on the part page (Details) and under the status badge in the Parts list.
+- **Production:** this migration needs `supabase db push`, with Travis's approval at deploy.
+- **Tests:** `tests/e2e/part-installed-on.spec.ts`.

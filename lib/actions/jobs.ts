@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { requireVehicle } from "@/lib/auth";
 import { createClient } from "@/lib/db/server";
+import { todayIso } from "@/lib/domain/dates";
 import {
   openBlockers,
   partsToOfferInstall,
@@ -249,9 +250,19 @@ export async function installReceivedParts(
   const jobId = z.uuid().safeParse(id);
   if (!jobId.success) return fail("Job not found.");
   const supabase = await createClient();
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("completed_on")
+    .eq("id", jobId.data)
+    .maybeSingle();
+  if (!job) return fail("Job not found.");
+  // Installed when the job was done (rule 4 follow-up), not when the offer was accepted.
   const { data, error } = await supabase
     .from("parts")
-    .update({ status: "installed" })
+    .update({
+      status: "installed",
+      installed_on: job.completed_on ?? todayIso(),
+    })
     .eq("job_id", jobId.data)
     .eq("status", "received")
     .select("id");

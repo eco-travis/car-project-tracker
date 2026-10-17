@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  installedOnFor,
   partStatusAfterExpense,
   partsNotOrdered,
   recordSaleError,
@@ -62,5 +63,22 @@ describe("partsNotOrdered", () => {
       "researching",
       "wishlist",
     ]);
+  });
+});
+
+describe("installedOnFor", () => {
+  it("dates an Installed part with the fallback when no date was given", () => {
+    expect(installedOnFor("installed", null, "2026-10-16")).toBe("2026-10-16");
+  });
+  it("keeps a date the user entered", () => {
+    expect(installedOnFor("installed", "2026-09-30", "2026-10-16")).toBe(
+      "2026-09-30",
+    );
+    expect(installedOnFor("removed", "2026-09-30", "2026-10-16")).toBe(
+      "2026-09-30",
+    );
+  });
+  it("leaves other statuses undated", () => {
+    expect(installedOnFor("received", null, "2026-10-16")).toBeNull();
   });
 });

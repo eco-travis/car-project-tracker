@@ -131,6 +131,11 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
         </h2>
         <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           {/* Essentials always show; the optional "More details" fields only when filled in. */}
+          {part.installed_on && (
+            <Detail label="Installed on">
+              {formatDate(part.installed_on)}
+            </Detail>
+          )}
           <Detail label="OEM part number" mono>
             {part.oem_part_number ?? "—"}
           </Detail>

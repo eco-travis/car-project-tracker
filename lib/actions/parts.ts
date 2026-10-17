@@ -4,7 +4,11 @@ import { z } from "zod";
 import { requireVehicle } from "@/lib/auth";
 import { createClient } from "@/lib/db/server";
 import { todayIso } from "@/lib/domain/dates";
-import { recordSaleError, saleExpense } from "@/lib/domain/parts";
+import {
+  installedOnFor,
+  recordSaleError,
+  saleExpense,
+} from "@/lib/domain/parts";
 import {
   newPartSchema,
   partSchema,
@@ -38,7 +42,15 @@ export async function createPart(
   const { cost_cents, ...fields } = parsed.data;
   const { data, error } = await supabase
     .from("parts")
-    .insert({ ...fields, vehicle_id: vehicle.id })
+    .insert({
+      ...fields,
+      installed_on: installedOnFor(
+        fields.status,
+        fields.installed_on,
+        todayIso(),
+      ),
+      vehicle_id: vehicle.id,
+    })
     .select("id")
     .single();
   if (error) return fail("Couldn't create the part.");
@@ -91,7 +103,14 @@ export async function updatePart(
 
   const { data, error } = await supabase
     .from("parts")
-    .update(parsed.data)
+    .update({
+      ...parsed.data,
+      installed_on: installedOnFor(
+        parsed.data.status,
+        parsed.data.installed_on,
+        todayIso(),
+      ),
+    })
     .eq("id", partId.data)
     .select("id");
   if (error) return fail("Couldn't save the part.");
@@ -148,6 +167,14 @@ export async function setPartStatus(
     .select("id");
   if (error) return fail("Couldn't change the status.");
   if (!data.length) return fail("Part not found.");
+  if (parsed.data.status === "installed") {
+    // Date it today unless it already has an install date.
+    await supabase
+      .from("parts")
+      .update({ installed_on: todayIso() })
+      .eq("id", partId.data)
+      .is("installed_on", null);
+  }
   refreshApp();
   return ok();
 }

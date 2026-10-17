@@ -7,6 +7,7 @@ import { controlClass } from "@/components/form/field";
 import { Money } from "@/components/money";
 import { DeletePartButton } from "@/components/parts/delete-part-button";
 import { PartFormDialog } from "@/components/parts/part-form-dialog";
+import { formatDate } from "@/lib/format";
 import { PartStatusBadge } from "@/components/parts/part-status-badge";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
@@ -179,6 +180,11 @@ export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
                   </td>
                   <td className="px-3 py-2">
                     <PartStatusBadge status={p.status} />
+                    {p.installed_on && (
+                      <p className="text-muted-foreground mt-0.5 text-xs tabular-nums">
+                        {formatDate(p.installed_on)}
+                      </p>
+                    )}
                   </td>
                   <td className="hidden px-3 py-2 font-mono text-xs md:table-cell">
                     {[

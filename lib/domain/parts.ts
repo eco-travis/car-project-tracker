@@ -36,3 +36,16 @@ export function partsNotOrdered<T extends { status: PartStatus }>(
 ): T[] {
   return parts.filter((p) => PRE_ORDER_STATUSES.includes(p.status));
 }
+
+/**
+ * Install date (Travis, 2026-10-16): an Installed part gets a date. Keep one the user entered;
+ * otherwise use the fallback (today, or the job's completion date when Mark done installs it).
+ */
+export function installedOnFor(
+  status: PartStatus,
+  installedOn: string | null,
+  fallback: string,
+): string | null {
+  if (installedOn) return installedOn;
+  return status === "installed" ? fallback : null;
+}

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Paperclip, X } from "lucide-react";
 import { ClientTrigger } from "@/components/client-trigger";
@@ -84,14 +84,24 @@ export function PartFormDialog({
     warranty_notes: part?.warranty_notes ?? "",
     quantity: String(part?.quantity ?? 1),
     notes: part?.notes ?? "",
+    installed_on: part?.installed_on ?? "",
     cost_cents: "",
   };
-  const { register, handleSubmit, getValues, setError, reset, formState } =
-    useForm<PartFormValues, unknown, PartInput>({
-      resolver: zodResolver(newPartSchema),
-      defaultValues: defaults,
-    });
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setError,
+    reset,
+    control,
+    formState,
+  } = useForm<PartFormValues, unknown, PartInput>({
+    resolver: zodResolver(newPartSchema),
+    defaultValues: defaults,
+  });
   const { errors, isSubmitting } = formState;
+  const status = useWatch({ control, name: "status" });
+  const installedOn = useWatch({ control, name: "installed_on" });
   const moreDetailsError = (
     [
       "brand",
@@ -182,6 +192,18 @@ export function PartFormDialog({
             error={errors.status?.message}
             {...register("status")}
           />
+          {(status === "installed" || installedOn) && (
+            <TextField
+              id="part-installed-on"
+              label="Installed on"
+              type="date"
+              hint={
+                status === "installed" ? "Leave blank for today." : undefined
+              }
+              error={errors.installed_on?.message}
+              {...register("installed_on")}
+            />
+          )}
           <TextField
             id="part-quantity"
             label="Quantity"

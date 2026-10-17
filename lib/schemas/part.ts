@@ -49,6 +49,7 @@ export const partSchema = z.object({
   return_by: optionalDate,
   warranty_notes: optionalText,
   quantity: optionalInt("Quantity", 1, 9999).transform((n) => n ?? 1),
+  installed_on: optionalDate,
   notes: optionalText,
 });
 
